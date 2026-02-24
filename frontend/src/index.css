@@ -1,0 +1,187 @@
+/* =============================================
+   SHADOWSTACK – Global Design System
+   ============================================= */
+
+/* --- CSS Custom Properties (Design Tokens) --- */
+:root {
+  /* Colors */
+  --clr-bg-deep:       #070b14;
+  --clr-bg-base:       #0d1117;
+  --clr-bg-surface:    #111827;
+  --clr-bg-elevated:   #1a2335;
+  --clr-bg-hover:      #1f2e47;
+
+  --clr-border:        rgba(255, 255, 255, 0.07);
+  --clr-border-accent: rgba(99, 179, 237, 0.25);
+
+  --clr-primary:       #63b3ed;
+  --clr-primary-dim:   rgba(99, 179, 237, 0.12);
+  --clr-secondary:     #9f7aea;
+  --clr-accent-green:  #48bb78;
+  --clr-accent-amber:  #ecc94b;
+  --clr-accent-red:    #fc8181;
+
+  --clr-text-primary:  #e2e8f0;
+  --clr-text-secondary:#94a3b8;
+  --clr-text-muted:    #4a5568;
+
+  /* Typography */
+  --font-base:         'Inter', sans-serif;
+  --font-display:      'Space Grotesk', sans-serif;
+
+  --fs-xs:    0.75rem;
+  --fs-sm:    0.875rem;
+  --fs-base:  1rem;
+  --fs-lg:    1.125rem;
+  --fs-xl:    1.25rem;
+  --fs-2xl:   1.5rem;
+  --fs-3xl:   1.875rem;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radii */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full:9999px;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(99, 179, 237, 0.08);
+
+  /* Sidebar width */
+  --sidebar-width:       240px;
+  --sidebar-width-collapsed: 64px;
+
+  /* Header height */
+  --header-height: 60px;
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-medium: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Reset & Base Styles --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-base);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  color: var(--clr-text-primary);
+  background-color: var(--clr-bg-base);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+/* --- Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--clr-bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--clr-bg-elevated);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-bg-hover);
+}
+
+/* --- Utility Classes --- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.glass {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--clr-border);
+}
+
+.card {
+  background: var(--clr-bg-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--clr-border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Status badge colors */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+}
+.badge--green  { background: rgba(72, 187, 120, 0.12); color: var(--clr-accent-green); }
+.badge--amber  { background: rgba(236, 201, 75, 0.12);  color: var(--clr-accent-amber); }
+.badge--red    { background: rgba(252, 129, 129, 0.12); color: var(--clr-accent-red); }
+.badge--blue   { background: var(--clr-primary-dim);    color: var(--clr-primary); }

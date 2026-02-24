@@ -1,0 +1,104 @@
+/* =============================================
+   Layout Component Styles
+   ============================================= */
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.layout__body {
+    display: flex;
+    flex: 1;
+    padding-top: var(--header-height);
+}
+
+/* Content area shifts right to accommodate sidebar */
+.layout__main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    min-width: 0;
+    transition: margin-left var(--transition-medium);
+    background: var(--clr-bg-base);
+}
+
+.layout__main--collapsed {
+    margin-left: var(--sidebar-width-collapsed);
+}
+
+.layout__content {
+    padding: var(--space-8);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Mobile overlay backdrop */
+.layout__overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 200ms ease;
+}
+
+.layout__overlay--visible {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Page heading utility used across pages */
+.page-header {
+    margin-bottom: var(--space-8);
+}
+
+.page-header__eyebrow {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clr-primary);
+    margin-bottom: var(--space-2);
+}
+
+.page-header__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--clr-text-primary);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.page-header__subtitle {
+    margin-top: var(--space-2);
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .layout__main,
+    .layout__main--collapsed {
+        margin-left: 0;
+    }
+
+    .layout__content {
+        padding: var(--space-5) var(--space-4);
+    }
+
+    .page-header__title {
+        font-size: var(--fs-2xl);
+    }
+}
