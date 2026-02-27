@@ -1,10 +1,53 @@
 /**
- * mockData.js – Sprint 1 mock data for all dashboard widgets.
+ * mockData.ts – Sprint 1 mock data for all dashboard widgets.
  * Replace with real API calls in Sprint 2.
  */
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+export type Direction = 'up' | 'down'
+export type Severity = 'high' | 'medium' | 'low'
+
+export interface KpiItem {
+    id: string
+    label: string
+    value: string
+    delta: string
+    direction: Direction
+    period: string
+    iconBg: string
+    iconColor: string
+}
+
+export interface DataPoint {
+    date: Date
+    value: number
+}
+
+export interface ServiceSpendItem {
+    name: string
+    cost: number
+    pct: number
+    color: string
+}
+
+export interface AlertItem {
+    id: number
+    severity: Severity
+    message: string
+    time: string
+}
+
+export interface TopResource {
+    id: string
+    name: string
+    type: string
+    cost: string
+    pct: number
+    color: string
+}
+
 // ── KPI Cards ────────────────────────────────────────────────────────────────
-export const KPI_DATA = [
+export const KPI_DATA: KpiItem[] = [
     {
         id: 'total-spend',
         label: 'Total Spend',
@@ -40,7 +83,7 @@ export const KPI_DATA = [
         label: 'Efficiency Score',
         value: '74.3',
         delta: '+3.1',
-        direction: 'down',  // higher is good → green
+        direction: 'down', // higher is good → green
         period: 'pts this month',
         iconBg: 'rgba(236,201,75,0.12)',
         iconColor: '#ecc94b',
@@ -48,8 +91,8 @@ export const KPI_DATA = [
 ]
 
 // ── Cost Trend (30 days) ──────────────────────────────────────────────────────
-function generateDailySpend(days = 30, baseValue = 1400, variance = 300) {
-    const data = []
+function generateDailySpend(days = 30, baseValue = 1400, variance = 300): DataPoint[] {
+    const data: DataPoint[] = []
     const now = new Date()
     for (let i = days - 1; i >= 0; i--) {
         const date = new Date(now)
@@ -61,12 +104,12 @@ function generateDailySpend(days = 30, baseValue = 1400, variance = 300) {
     return data
 }
 
-export const COST_TREND_DATA = generateDailySpend(30, 1420, 320)
+export const COST_TREND_DATA: DataPoint[] = generateDailySpend(30, 1420, 320)
 
 // Predicted overlay (days 25–45)
-export const COST_FORECAST_DATA = (() => {
+export const COST_FORECAST_DATA: DataPoint[] = (() => {
     const lastReal = COST_TREND_DATA[COST_TREND_DATA.length - 1]
-    const forecast = []
+    const forecast: DataPoint[] = []
     for (let i = 1; i <= 15; i++) {
         const date = new Date(lastReal.date)
         date.setDate(date.getDate() + i)
@@ -77,7 +120,7 @@ export const COST_FORECAST_DATA = (() => {
 })()
 
 // ── Service Breakdown ─────────────────────────────────────────────────────────
-export const SERVICE_SPEND = [
+export const SERVICE_SPEND: ServiceSpendItem[] = [
     { name: 'EC2 Compute', cost: 18420, pct: 38, color: '#63b3ed' },
     { name: 'RDS Database', cost: 9810, pct: 20, color: '#9f7aea' },
     { name: 'S3 Storage', cost: 5780, pct: 12, color: '#48bb78' },
@@ -87,14 +130,14 @@ export const SERVICE_SPEND = [
 ]
 
 // ── Anomaly Alerts ────────────────────────────────────────────────────────────
-export const RECENT_ALERTS = [
+export const RECENT_ALERTS: AlertItem[] = [
     { id: 1, severity: 'high', message: 'EC2 spend 34% above 7-day avg', time: '2m ago' },
     { id: 2, severity: 'medium', message: 'Untagged resources: 17 detected', time: '18m ago' },
     { id: 3, severity: 'low', message: 'S3 storage growth +8% this week', time: '1h ago' },
 ]
 
 // ── Top Resources by Cost ─────────────────────────────────────────────────────
-export const TOP_RESOURCES = [
+export const TOP_RESOURCES: TopResource[] = [
     { id: 'r1', name: 'prod-api-cluster', type: 'EKS', cost: '$8,240', pct: 85, color: '#63b3ed' },
     { id: 'r2', name: 'analytics-db-master', type: 'RDS', cost: '$5,120', pct: 53, color: '#9f7aea' },
     { id: 'r3', name: 'ml-training-gpu-fleet', type: 'EC2', cost: '$4,870', pct: 50, color: '#fc8181' },

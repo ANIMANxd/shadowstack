@@ -1,13 +1,16 @@
 import './PlaceholderPage.css'
 
+// ── Props ─────────────────────────────────────────────────────────────────────
+interface PlaceholderPageProps {
+    title: string
+    icon?: string
+    description?: string
+}
+
 /**
  * PlaceholderPage – fallback view for routes not yet implemented.
- * Props:
- *  - title       : string
- *  - icon        : string  (emoji)
- *  - description : string
  */
-export default function PlaceholderPage({ title, icon = '🚧', description }) {
+export default function PlaceholderPage({ title, icon = '🚧', description }: PlaceholderPageProps): JSX.Element {
     return (
         <section className="placeholder-page" aria-labelledby="placeholder-title">
             <header className="page-header">

@@ -1,19 +1,29 @@
 import { useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import './D3Chart.css'
+import type { DataPoint } from '../../data/mockData'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface Margin {
+    top: number
+    right: number
+    bottom: number
+    left: number
+}
+
+interface D3ChartProps {
+    data?: DataPoint[]
+    color?: string
+    label?: string
+    formatValue?: (val: number) => string
+    margin?: Margin
+}
 
 /**
  * D3Chart – a safe, reusable D3.js wrapper for React.
  *
  * React owns the DOM node lifecycle; D3 only operates INSIDE the svg ref,
  * preventing VirtualDOM conflicts.
- *
- * Props:
- *  - data        : Array<{ date: Date, value: number }>
- *  - color       : string  (stroke/fill color, defaults to CSS primary)
- *  - label       : string  (y-axis unit label)
- *  - formatValue : (val: number) => string  (tooltip formatter)
- *  - margin      : { top, right, bottom, left }
  */
 export default function D3Chart({
     data = [],
@@ -21,10 +31,10 @@ export default function D3Chart({
     label = 'Value',
     formatValue = (v) => `$${v.toLocaleString()}`,
     margin = { top: 16, right: 16, bottom: 36, left: 52 },
-}) {
-    const containerRef = useRef(null)
-    const svgRef = useRef(null)
-    const tooltipRef = useRef(null)
+}: D3ChartProps): JSX.Element {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const svgRef = useRef<SVGSVGElement>(null)
+    const tooltipRef = useRef<HTMLDivElement>(null)
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
     // ── Observe container size ──────────────────────────────────────────────
@@ -60,10 +70,10 @@ export default function D3Chart({
 
         // ── Scales ────────────────────────────────────────────────────────────
         const xScale = d3.scaleTime()
-            .domain(d3.extent(data, d => d.date))
+            .domain(d3.extent(data, d => d.date) as [Date, Date])
             .range([0, innerW])
 
-        const yExtent = d3.extent(data, d => d.value)
+        const yExtent = d3.extent(data, d => d.value) as [number, number]
         const yPad = (yExtent[1] - yExtent[0]) * 0.15 || 10
         const yScale = d3.scaleLinear()
             .domain([yExtent[0] - yPad, yExtent[1] + yPad])
@@ -77,7 +87,7 @@ export default function D3Chart({
                 d3.axisLeft(yScale)
                     .ticks(5)
                     .tickSize(-innerW)
-                    .tickFormat('')
+                    .tickFormat(() => '')
             )
 
         // ── Axes ──────────────────────────────────────────────────────────────
@@ -85,7 +95,7 @@ export default function D3Chart({
             .attr('class', 'axis axis--x')
             .attr('transform', `translate(0,${innerH})`)
             .call(
-                d3.axisBottom(xScale)
+                d3.axisBottom<Date>(xScale as d3.ScaleTime<number, number>)
                     .ticks(6)
                     .tickFormat(d3.timeFormat('%b %d'))
             )
@@ -95,7 +105,7 @@ export default function D3Chart({
             .call(
                 d3.axisLeft(yScale)
                     .ticks(5)
-                    .tickFormat(d => `$${d3.format('.2s')(d)}`)
+                    .tickFormat(d => `$${d3.format('.2s')(d as number)}`)
             )
 
         // Y-axis label
@@ -120,7 +130,7 @@ export default function D3Chart({
         grad.append('stop').attr('offset', '100%').attr('stop-color', color).attr('stop-opacity', 0.02)
 
         // ── Area path ─────────────────────────────────────────────────────────
-        const areaGen = d3.area()
+        const areaGen = d3.area<DataPoint>()
             .x(d => xScale(d.date))
             .y0(innerH)
             .y1(d => yScale(d.value))
@@ -133,7 +143,7 @@ export default function D3Chart({
             .attr('d', areaGen)
 
         // ── Line path ─────────────────────────────────────────────────────────
-        const lineGen = d3.line()
+        const lineGen = d3.line<DataPoint>()
             .x(d => xScale(d.date))
             .y(d => yScale(d.value))
             .curve(d3.curveCatmullRom.alpha(0.5))
@@ -145,7 +155,7 @@ export default function D3Chart({
             .attr('d', lineGen)
 
         // ── Tooltip + bisector ────────────────────────────────────────────────
-        const bisect = d3.bisector(d => d.date).center
+        const bisect = d3.bisector<DataPoint, Date>(d => d.date).center
         const focusDot = g.append('circle')
             .attr('r', 5)
             .attr('fill', color)
@@ -161,7 +171,7 @@ export default function D3Chart({
             .attr('width', innerW)
             .attr('height', innerH)
             .attr('fill', 'transparent')
-            .on('mousemove', (event) => {
+            .on('mousemove', (event: MouseEvent) => {
                 const [mx] = d3.pointer(event)
                 const x0 = xScale.invert(mx)
                 const i = bisect(data, x0)

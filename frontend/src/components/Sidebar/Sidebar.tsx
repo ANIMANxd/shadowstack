@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import './Sidebar.css'
 
 // ── Inline SVG Icons (no external deps) ────────────────────────────────────
-const DashboardIcon = () => (
+const DashboardIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -12,7 +12,7 @@ const DashboardIcon = () => (
     </svg>
 )
 
-const CostIcon = () => (
+const CostIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
@@ -21,14 +21,14 @@ const CostIcon = () => (
     </svg>
 )
 
-const PredictIcon = () => (
+const PredictIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
 )
 
-const ResourcesIcon = () => (
+const ResourcesIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <ellipse cx="12" cy="5" rx="9" ry="3" />
@@ -37,7 +37,7 @@ const ResourcesIcon = () => (
     </svg>
 )
 
-const AlertsIcon = () => (
+const AlertsIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -46,7 +46,7 @@ const AlertsIcon = () => (
     </svg>
 )
 
-const ReportsIcon = () => (
+const ReportsIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -54,7 +54,7 @@ const ReportsIcon = () => (
     </svg>
 )
 
-const SettingsIcon = () => (
+const SettingsIcon = (): JSX.Element => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3" />
@@ -62,39 +62,49 @@ const SettingsIcon = () => (
     </svg>
 )
 
-const CollapseIcon = () => (
+const CollapseIcon = (): JSX.Element => (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <polyline points="15 18 9 12 15 6" />
     </svg>
 )
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface NavItem {
+    to: string
+    label: string
+    Icon: () => JSX.Element
+    count?: number
+}
+
+interface SidebarProps {
+    isCollapsed: boolean
+    onToggle: () => void
+    mobileOpen: boolean
+}
+
 // ── Navigation Config ────────────────────────────────────────────────────────
-const PRIMARY_NAV = [
+const PRIMARY_NAV: NavItem[] = [
     { to: '/', label: 'Overview', Icon: DashboardIcon },
     { to: '/costs', label: 'Cost Analysis', Icon: CostIcon },
     { to: '/predict', label: 'Predictions', Icon: PredictIcon },
     { to: '/resources', label: 'Resources', Icon: ResourcesIcon },
 ]
 
-const SECONDARY_NAV = [
+const SECONDARY_NAV: NavItem[] = [
     { to: '/alerts', label: 'Alerts', Icon: AlertsIcon, count: 3 },
     { to: '/reports', label: 'Reports', Icon: ReportsIcon },
 ]
 
-const TERTIARY_NAV = [
+const TERTIARY_NAV: NavItem[] = [
     { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ]
 
 // ── Component ────────────────────────────────────────────────────────────────
 /**
  * Sidebar – collapsible navigation panel
- * Props:
- *  - isCollapsed : boolean
- *  - onToggle    : () => void
- *  - mobileOpen  : boolean  (mobile overlay open state)
  */
-export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
+export default function Sidebar({ isCollapsed, onToggle, mobileOpen }: SidebarProps): JSX.Element {
     const sidebarClass = [
         'sidebar',
         isCollapsed ? 'sidebar--collapsed' : '',

@@ -7,24 +7,29 @@ import {
     RECENT_ALERTS,
     TOP_RESOURCES,
 } from '../../data/mockData'
+import type { KpiItem, AlertItem as AlertItemType, Severity } from '../../data/mockData'
 import './Dashboard.css'
 
 // ── KPI Icons ─────────────────────────────────────────────────────────────────
-const icons = {
+const icons: Record<string, string> = {
     'total-spend': '💸',
     'predicted-30d': '🔮',
     'savings': '✅',
     'efficiency-score': '⚡',
 }
 
-const ArrowUp = () => <span aria-hidden="true">▲</span>
-const ArrowDown = () => <span aria-hidden="true">▼</span>
+const ArrowUp = (): JSX.Element => <span aria-hidden="true">▲</span>
+const ArrowDown = (): JSX.Element => <span aria-hidden="true">▼</span>
 
 // Severity → badge class
-const severityClass = { high: 'badge--red', medium: 'badge--amber', low: 'badge--blue' }
+const severityClass: Record<Severity, string> = {
+    high: 'badge--red',
+    medium: 'badge--amber',
+    low: 'badge--blue',
+}
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
-function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor }) {
+function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor }: KpiItem): JSX.Element {
     return (
         <article className="kpi-card" aria-label={label}>
             <div className="kpi-card__top">
@@ -43,7 +48,7 @@ function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor
     )
 }
 
-function AlertItem({ severity, message, time }) {
+function AlertItem({ severity, message, time }: AlertItemType): JSX.Element {
     return (
         <li style={{
             display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)',
@@ -63,13 +68,15 @@ function AlertItem({ severity, message, time }) {
     )
 }
 
-// ── Main Dashboard Page ────────────────────────────────────────────────────────
-export default function Dashboard() {
-    const [activeRange, setActiveRange] = useState('30D')
-    const ranges = ['7D', '30D', '90D']
+// ── Range types ───────────────────────────────────────────────────────────────
+type Range = '7D' | '30D' | '90D'
+const rangeMap: Record<Range, number> = { '7D': 7, '30D': 30, '90D': 30 }
 
-    // Filter trend data by active range
-    const rangeMap = { '7D': 7, '30D': 30, '90D': 30 }
+// ── Main Dashboard Page ────────────────────────────────────────────────────────
+export default function Dashboard(): JSX.Element {
+    const [activeRange, setActiveRange] = useState<Range>('30D')
+    const ranges: Range[] = ['7D', '30D', '90D']
+
     const visibleData = COST_TREND_DATA.slice(-rangeMap[activeRange])
 
     return (

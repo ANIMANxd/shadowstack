@@ -4,7 +4,7 @@ import Header from '../Header/Header'
 import Sidebar from '../Sidebar/Sidebar'
 import './Layout.css'
 
-// Lazy page imports
+// Page imports
 import Dashboard from '../../pages/Dashboard/Dashboard'
 import PlaceholderPage from '../../pages/PlaceholderPage/PlaceholderPage'
 
@@ -12,7 +12,7 @@ import PlaceholderPage from '../../pages/PlaceholderPage/PlaceholderPage'
  * Layout – root application shell
  * Manages sidebar collapsed/mobile state and renders all routes.
  */
-export default function Layout() {
+export default function Layout(): JSX.Element {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
 
