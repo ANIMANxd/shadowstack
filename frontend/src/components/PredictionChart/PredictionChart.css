@@ -1,0 +1,118 @@
+/* ── Wrapper ─────────────────────────────────────────────────── */
+.pred-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.pred-chart-wrapper svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* ── Axes & Grid ──────────────────────────────────────────────── */
+.pred-chart-wrapper .axis text {
+    fill: var(--clr-text-muted);
+    font-size: 10px;
+    font-family: var(--font-base);
+}
+
+.pred-chart-wrapper .axis path,
+.pred-chart-wrapper .axis line {
+    stroke: var(--clr-border);
+}
+
+.pred-chart-wrapper .grid line {
+    stroke: var(--clr-border);
+    stroke-dasharray: 3 4;
+}
+
+.pred-chart-wrapper .grid path {
+    stroke: none;
+}
+
+/* ── Historical data ──────────────────────────────────────────── */
+.pred-hist-line {
+    fill: none;
+    stroke: var(--clr-primary);
+    stroke-width: 2.5;
+}
+
+/* ── Forecast data ────────────────────────────────────────────── */
+.pred-fore-line {
+    fill: none;
+    stroke: var(--clr-secondary);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+    opacity: 0.9;
+}
+
+/* ── Confidence band ──────────────────────────────────────────── */
+.pred-ci-band {
+    fill: var(--clr-secondary);
+    opacity: 0.10;
+}
+
+/* ── TODAY line ───────────────────────────────────────────────── */
+.pred-today-line {
+    stroke: rgba(255, 255, 255, 0.18);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+}
+
+.pred-today-label {
+    fill: var(--clr-text-muted);
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* ── Legend ───────────────────────────────────────────────────── */
+.pred-legend-text {
+    fill: var(--clr-text-muted);
+    font-size: 10px;
+    dominant-baseline: central;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────── */
+.pred-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--clr-bg-elevated);
+    border: 1px solid var(--clr-border-accent);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    box-shadow: var(--shadow-md);
+    min-width: 148px;
+    z-index: 10;
+}
+
+.pred-tooltip--hidden {
+    display: none;
+}
+
+.pred-tooltip__tag {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-primary);
+    margin-bottom: var(--space-1);
+}
+
+.pred-tooltip__tag--fore {
+    color: var(--clr-secondary);
+}
+
+.pred-tooltip__date {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    margin-bottom: 2px;
+}
+
+.pred-tooltip__value {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    font-family: var(--font-display);
+    color: var(--clr-text-primary);
+}

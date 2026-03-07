@@ -1,12 +1,9 @@
 import { useState } from 'react'
 import D3Chart from '../../components/D3Chart/D3Chart'
-import {
-    KPI_DATA,
-    COST_TREND_DATA,
-    SERVICE_SPEND,
-    RECENT_ALERTS,
-    TOP_RESOURCES,
-} from '../../data/mockData'
+import StatusBadge from '../../components/StatusBadge/StatusBadge'
+import PredictionChart from '../../components/PredictionChart/PredictionChart'
+import ConfidenceWidget from '../../components/ConfidenceWidget/ConfidenceWidget'
+import { useDashboardData } from '../../hooks/useApi'
 import type { KpiItem, AlertItem as AlertItemType, Severity } from '../../data/mockData'
 import './Dashboard.css'
 
@@ -21,14 +18,24 @@ const icons: Record<string, string> = {
 const ArrowUp = (): JSX.Element => <span aria-hidden="true">▲</span>
 const ArrowDown = (): JSX.Element => <span aria-hidden="true">▼</span>
 
-// Severity → badge class
 const severityClass: Record<Severity, string> = {
     high: 'badge--red',
     medium: 'badge--amber',
     low: 'badge--blue',
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
+// ── Skeleton loader ───────────────────────────────────────────────────────────
+function Skeleton({ h, r }: { h: number | string; r?: number }): JSX.Element {
+    return (
+        <div
+            className="skeleton"
+            style={{ height: h, borderRadius: r ?? 10 }}
+            aria-hidden="true"
+        />
+    )
+}
+
+// ── KPI Card ──────────────────────────────────────────────────────────────────
 function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor }: KpiItem): JSX.Element {
     return (
         <article className="kpi-card" aria-label={label}>
@@ -48,6 +55,17 @@ function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor
     )
 }
 
+function KpiCardSkeleton(): JSX.Element {
+    return (
+        <article className="kpi-card" aria-hidden="true">
+            <Skeleton h={14} r={6} />
+            <Skeleton h={32} r={8} />
+            <Skeleton h={12} r={6} />
+        </article>
+    )
+}
+
+// ── Alert Item ────────────────────────────────────────────────────────────────
 function AlertItem({ severity, message, time }: AlertItemType): JSX.Element {
     return (
         <li style={{
@@ -72,29 +90,38 @@ function AlertItem({ severity, message, time }: AlertItemType): JSX.Element {
 type Range = '7D' | '30D' | '90D'
 const rangeMap: Record<Range, number> = { '7D': 7, '30D': 30, '90D': 30 }
 
-// ── Main Dashboard Page ────────────────────────────────────────────────────────
+// ── Main Dashboard Page ───────────────────────────────────────────────────────
 export default function Dashboard(): JSX.Element {
     const [activeRange, setActiveRange] = useState<Range>('30D')
     const ranges: Range[] = ['7D', '30D', '90D']
 
-    const visibleData = COST_TREND_DATA.slice(-rangeMap[activeRange])
+    const { data, isLoading, isLive, lastUpdated, refresh } = useDashboardData()
+
+    const visibleCostTrend = data?.costTrend.slice(-rangeMap[activeRange]) ?? []
 
     return (
         <section aria-labelledby="dashboard-title">
-            {/* Page header */}
+            {/* ── Page header ── */}
             <header className="page-header">
                 <p className="page-header__eyebrow">Overview</p>
                 <h1 className="page-header__title" id="dashboard-title">Cost Intelligence</h1>
                 <p className="page-header__subtitle">
-                    Real-time cloud spend analytics and predictive forecasting &mdash; Feb 2026
+                    Real-time cloud spend analytics and predictive forecasting &mdash; Mar 2026
                 </p>
+                <StatusBadge
+                    isLive={isLive}
+                    lastUpdated={lastUpdated}
+                    onRefresh={refresh}
+                    isLoading={isLoading}
+                />
             </header>
 
             {/* ── KPI Strip ── */}
             <div className="dashboard__kpi-grid" role="list" aria-label="Key performance indicators">
-                {KPI_DATA.map(kpi => (
-                    <KpiCard key={kpi.id} {...kpi} />
-                ))}
+                {isLoading
+                    ? [1, 2, 3, 4].map(i => <KpiCardSkeleton key={i} />)
+                    : data?.kpis.map(kpi => <KpiCard key={kpi.id} {...kpi} />)
+                }
             </div>
 
             {/* ── Charts Row ── */}
@@ -122,12 +149,15 @@ export default function Dashboard(): JSX.Element {
                         </div>
                     </div>
                     <div className="widget__chart-area">
-                        <D3Chart
-                            data={visibleData}
-                            color="var(--clr-primary)"
-                            label="USD / day"
-                            formatValue={v => `$${v.toLocaleString()}`}
-                        />
+                        {isLoading
+                            ? <Skeleton h="100%" />
+                            : <D3Chart
+                                data={visibleCostTrend}
+                                color="var(--clr-primary)"
+                                label="USD / day"
+                                formatValue={v => `$${v.toLocaleString()}`}
+                            />
+                        }
                     </div>
                 </div>
 
@@ -140,16 +170,19 @@ export default function Dashboard(): JSX.Element {
                         </div>
                     </div>
                     <div className="resource-list" role="list">
-                        {SERVICE_SPEND.map(s => (
-                            <div key={s.name} className="resource-list__item" role="listitem">
-                                <span className="resource-list__dot" style={{ background: s.color }} aria-hidden="true" />
-                                <span className="resource-list__name">{s.name}</span>
-                                <div className="resource-list__bar-wrap" aria-hidden="true">
-                                    <div className="resource-list__bar" style={{ width: `${s.pct}%`, background: s.color }} />
+                        {isLoading
+                            ? [1, 2, 3, 4, 5].map(i => <Skeleton key={i} h={36} />)
+                            : data?.serviceSpend.map(s => (
+                                <div key={s.name} className="resource-list__item" role="listitem">
+                                    <span className="resource-list__dot" style={{ background: s.color }} aria-hidden="true" />
+                                    <span className="resource-list__name">{s.name}</span>
+                                    <div className="resource-list__bar-wrap" aria-hidden="true">
+                                        <div className="resource-list__bar" style={{ width: `${s.pct}%`, background: s.color }} />
+                                    </div>
+                                    <span className="resource-list__cost">${s.cost.toLocaleString()}</span>
                                 </div>
-                                <span className="resource-list__cost">${s.cost.toLocaleString()}</span>
-                            </div>
-                        ))}
+                            ))
+                        }
                     </div>
                 </div>
 
@@ -158,17 +191,37 @@ export default function Dashboard(): JSX.Element {
             {/* ── Bottom Row ── */}
             <div className="dashboard__bottom-row">
 
-                {/* Forecast placeholder */}
-                <div className="widget">
+                {/* ML Forecast – PredictionChart replaces Sprint 1 shimmer */}
+                <div className="widget widget--forecast">
                     <div className="widget__header">
                         <div className="widget__title-group">
                             <p className="widget__label">ML Forecast</p>
                             <h2 className="widget__title">30-Day Prediction</h2>
-                            <p className="widget__subtitle">Connects in Sprint 2</p>
+                            <p className="widget__subtitle">
+                                {data?.prediction.model_name ?? 'Loading model…'}
+                            </p>
                         </div>
                     </div>
+
+                    {/* Confidence ring + stats */}
+                    <ConfidenceWidget
+                        prediction={data?.prediction ?? {
+                            forecast: [], ci_upper: [], ci_lower: [],
+                            confidence: 0, trend_direction: 'stable',
+                            predicted_total: 0, model_name: '', generated_at: new Date()
+                        }}
+                        isLoading={isLoading}
+                    />
+
+                    {/* D3 Prediction chart */}
                     <div className="widget__chart-area">
-                        <div className="placeholder-shimmer" data-label="📈  Predictive chart coming in Sprint 2" />
+                        {isLoading || !data
+                            ? <Skeleton h="100%" />
+                            : <PredictionChart
+                                historicalData={data.costTrend}
+                                prediction={data.prediction}
+                            />
+                        }
                     </div>
                 </div>
 
@@ -179,10 +232,18 @@ export default function Dashboard(): JSX.Element {
                             <p className="widget__label">Anomaly Detection</p>
                             <h2 className="widget__title">Recent Alerts</h2>
                         </div>
-                        <span className="badge badge--red" aria-label="3 active alerts">3</span>
+                        <span
+                            className="badge badge--red"
+                            aria-label={`${data?.alerts.length ?? 0} active alerts`}
+                        >
+                            {isLoading ? '…' : data?.alerts.length}
+                        </span>
                     </div>
                     <ul aria-label="Alert list">
-                        {RECENT_ALERTS.map(a => <AlertItem key={a.id} {...a} />)}
+                        {isLoading
+                            ? [1, 2, 3].map(i => <li key={i} style={{ marginBottom: 'var(--space-2)' }}><Skeleton h={52} /></li>)
+                            : data?.alerts.map(a => <AlertItem key={a.id} {...a} />)
+                        }
                     </ul>
                 </div>
 
@@ -195,19 +256,22 @@ export default function Dashboard(): JSX.Element {
                         </div>
                     </div>
                     <div className="resource-list" role="list">
-                        {TOP_RESOURCES.map(r => (
-                            <div key={r.id} className="resource-list__item" role="listitem">
-                                <span className="resource-list__dot" style={{ background: r.color }} aria-hidden="true" />
-                                <span className="resource-list__name">
-                                    <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--clr-text-muted)' }}>{r.type}</span>
-                                    {r.name}
-                                </span>
-                                <div className="resource-list__bar-wrap" aria-hidden="true">
-                                    <div className="resource-list__bar" style={{ width: `${r.pct}%`, background: r.color }} />
+                        {isLoading
+                            ? [1, 2, 3, 4, 5].map(i => <Skeleton key={i} h={36} />)
+                            : data?.topResources.map(r => (
+                                <div key={r.id} className="resource-list__item" role="listitem">
+                                    <span className="resource-list__dot" style={{ background: r.color }} aria-hidden="true" />
+                                    <span className="resource-list__name">
+                                        <span style={{ display: 'block', fontSize: 'var(--fs-xs)', color: 'var(--clr-text-muted)' }}>{r.type}</span>
+                                        {r.name}
+                                    </span>
+                                    <div className="resource-list__bar-wrap" aria-hidden="true">
+                                        <div className="resource-list__bar" style={{ width: `${r.pct}%`, background: r.color }} />
+                                    </div>
+                                    <span className="resource-list__cost">{r.cost}</span>
                                 </div>
-                                <span className="resource-list__cost">{r.cost}</span>
-                            </div>
-                        ))}
+                            ))
+                        }
                     </div>
                 </div>
 

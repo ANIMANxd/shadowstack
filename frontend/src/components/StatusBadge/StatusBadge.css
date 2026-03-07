@@ -1,0 +1,90 @@
+.status-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+/* ── Badge pill ──────────────────────────────────────────────── */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 3px var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.status-badge--live {
+    background: rgba(72, 187, 120, 0.12);
+    color: var(--clr-accent-green);
+    border: 1px solid rgba(72, 187, 120, 0.25);
+}
+
+.status-badge--mock {
+    background: rgba(236, 201, 75, 0.12);
+    color: var(--clr-accent-amber);
+    border: 1px solid rgba(236, 201, 75, 0.25);
+}
+
+/* ── Pulsing dot ─────────────────────────────────────────────── */
+.status-badge__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.status-badge--live .status-badge__dot {
+    animation: pulse-live 2s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}
+
+/* ── Timestamp ───────────────────────────────────────────────── */
+.status-bar__time {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+}
+
+/* ── Refresh button ──────────────────────────────────────────── */
+.status-bar__refresh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    color: var(--clr-text-secondary);
+    background: var(--clr-bg-elevated);
+    border: 1px solid var(--clr-border);
+    transition: color var(--transition-fast), background var(--transition-fast);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.status-bar__refresh:hover:not(:disabled) {
+    color: var(--clr-primary);
+    background: var(--clr-primary-dim);
+}
+
+.status-bar__refresh:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.status-bar__refresh--spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

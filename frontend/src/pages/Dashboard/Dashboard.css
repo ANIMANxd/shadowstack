@@ -91,6 +91,12 @@
     gap: var(--space-5);
 }
 
+.widget--forecast {
+    grid-column: 1 / -1;
+    /* stretch forecast widget full width */
+    min-height: 460px;
+}
+
 /* ── Widget Skeleton ───────────────────────── */
 .widget {
     background: var(--clr-bg-surface);
@@ -116,7 +122,7 @@
     gap: var(--space-4);
 }
 
-.widget__title-group {}
+/* .widget__title-group is inheritor-only; no rules needed */
 
 .widget__label {
     font-size: var(--fs-xs);
@@ -170,6 +176,17 @@
     flex: 1;
     display: flex;
     align-items: stretch;
+}
+
+/* ── Skeleton loader ───────────────────────── */
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--clr-bg-elevated) 25%,
+            var(--clr-bg-hover) 50%,
+            var(--clr-bg-elevated) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    width: 100%;
 }
 
 /* Shimmer / placeholder loading animation */

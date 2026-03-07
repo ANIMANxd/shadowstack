@@ -1,0 +1,70 @@
+.conf-widget {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
+}
+
+/* ── Ring ────────────────────────────────────────────────────── */
+.conf-ring {
+    flex-shrink: 0;
+    width: 128px;
+    height: 128px;
+}
+
+/* ── Stats column ────────────────────────────────────────────── */
+.conf-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.conf-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3);
+    background: var(--clr-bg-elevated);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--clr-border);
+    transition: border-color var(--transition-fast);
+}
+
+.conf-stat:hover {
+    border-color: var(--clr-border-accent);
+}
+
+.conf-stat__label {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.conf-stat__value {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-text-primary);
+    font-family: var(--font-display);
+}
+
+.conf-stat__value--sm {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--clr-text-secondary);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 560px) {
+    .conf-widget {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .conf-ring {
+        width: 100px;
+        height: 100px;
+    }
+}
