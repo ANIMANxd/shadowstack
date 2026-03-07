@@ -4,11 +4,11 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: shadow_user
-      POSTGRES_PASSWORD: shadow_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: shadowstack_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -17,7 +17,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://shadow_user:shadow_pass@db:5432/shadowstack_db
+      DATABASE_URL: postgresql://postgres:password@db:5432/shadowstack_db
+      MODEL_PATH: /models/feature_pipeline2.pkl
+      LSTM_MODEL_PATH: /models/lstm_final_forecaster.pth
+    volumes:
+      - ./ml_pipeline/models:/models:ro
     depends_on:
       - db
 
