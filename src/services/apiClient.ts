@@ -215,15 +215,15 @@ export const dashboardApi = {
     get<KpiSummaryResponse>('/dashboard/kpis'),
 
   /** Fetch historical daily cost data */
-  getHistoricalCosts: (days: number = 30): Promise<HistoricalCostResponse> =>
+  getHistoricalCosts: (days: number = 30, service?: string): Promise<HistoricalCostResponse> =>
     get<HistoricalCostResponse>('/costs/historical', {
-      params: { days },
+      params: { days, service },
     }),
 
   /** Fetch ML-predicted future costs */
-  getPredictedCosts: (days: number = 30): Promise<PredictedCostResponse> =>
+  getPredictedCosts: (days: number = 30, service?: string): Promise<PredictedCostResponse> =>
     get<PredictedCostResponse>('/costs/predicted', {
-      params: { days },
+      params: { days, service },
     }),
 
   /** Fetch ML model performance metrics */
@@ -231,19 +231,19 @@ export const dashboardApi = {
     get<MlMetricsResponse>('/ml/metrics'),
 
   /** Fetch cost breakdown by AWS service */
-  getServiceBreakdown: (): Promise<ServiceBreakdownResponse> =>
-    get<ServiceBreakdownResponse>('/costs/services'),
+  getServiceBreakdown: (days?: number, service?: string): Promise<ServiceBreakdownResponse> =>
+    get<ServiceBreakdownResponse>('/costs/services', { params: { days, service } }),
 
   /** Fetch anomaly detection alerts */
   getAlerts: (): Promise<AlertsResponse> =>
     get<AlertsResponse>('/alerts'),
 
   /** Fetch top cost-driving resources */
-  getTopResources: (): Promise<TopResourcesResponse> =>
-    get<TopResourcesResponse>('/resources/top'),
+  getTopResources: (days?: number): Promise<TopResourcesResponse> =>
+    get<TopResourcesResponse>('/resources/top', { params: { days } }),
 
   /** Fetch all dashboard data in parallel (composite call) */
-  getAllDashboardData: async () => {
+  getAllDashboardData: async (days?: number, service?: string) => {
     const [
       kpis,
       historicalCosts,
@@ -254,12 +254,12 @@ export const dashboardApi = {
       topResources,
     ] = await Promise.all([
       dashboardApi.getKpis(),
-      dashboardApi.getHistoricalCosts(),
-      dashboardApi.getPredictedCosts(),
+      dashboardApi.getHistoricalCosts(days, service),
+      dashboardApi.getPredictedCosts(days, service),
       dashboardApi.getMlMetrics(),
-      dashboardApi.getServiceBreakdown(),
+      dashboardApi.getServiceBreakdown(days, service),
       dashboardApi.getAlerts(),
-      dashboardApi.getTopResources(),
+      dashboardApi.getTopResources(days),
     ])
 
     return {

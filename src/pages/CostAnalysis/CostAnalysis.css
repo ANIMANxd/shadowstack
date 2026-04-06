@@ -1,0 +1,50 @@
+/* =============================================
+   Cost Analysis Page
+   ============================================= */
+
+.cost-analysis-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.cost-analysis__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
+}
+
+.cost-analysis__main-chart {
+    display: flex;
+    flex-direction: column;
+}
+
+.cost-analysis__side-chart {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-scroll {
+    overflow-y: auto;
+    max-height: 200px;
+    padding-right: var(--space-2);
+}
+
+.list-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.list-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.list-scroll::-webkit-scrollbar-thumb {
+    background: var(--clr-border);
+    border-radius: var(--radius-full);
+}
+
+@media (max-width: 1024px) {
+    .cost-analysis__grid {
+        grid-template-columns: 1fr;
+    }
+}

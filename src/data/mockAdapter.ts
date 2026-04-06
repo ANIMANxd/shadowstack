@@ -47,10 +47,14 @@ function adaptKpis(): KpiSummaryResponse {
   }
 }
 
-function adaptHistoricalCosts(): HistoricalCostResponse {
-  const daily = COST_TREND_DATA.map((d: { date: Date; value: number }) => ({
+function adaptHistoricalCosts(days?: number, service?: string): HistoricalCostResponse {
+  // If a service is selected, simulate lower costs by slicing/multiplying
+  const serviceMultiplier = service && service !== 'all' ? 0.3 : 1;
+  const filterDays = days || 30;
+  
+  const daily = COST_TREND_DATA.slice(-filterDays).map((d: { date: Date; value: number }) => ({
     date: d.date.toISOString(),
-    value: d.value,
+    value: d.value * serviceMultiplier,
   }))
 
   return {
@@ -62,13 +66,16 @@ function adaptHistoricalCosts(): HistoricalCostResponse {
   }
 }
 
-function adaptPredictedCosts(): PredictedCostResponse {
+function adaptPredictedCosts(days?: number, service?: string): PredictedCostResponse {
+  const serviceMultiplier = service && service !== 'all' ? 0.3 : 1;
+  const filterDays = days || 30;
+
   return {
-    forecast: COST_FORECAST_DATA.map((d: { date: Date; value: number }) => ({
+    forecast: COST_FORECAST_DATA.slice(0, filterDays).map((d: { date: Date; value: number }) => ({
       date: d.date.toISOString(),
-      predictedValue: d.value,
-      lowerBound: Math.round(d.value * 0.85),
-      upperBound: Math.round(d.value * 1.15),
+      predictedValue: d.value * serviceMultiplier,
+      lowerBound: Math.round(d.value * serviceMultiplier * 0.85),
+      upperBound: Math.round(d.value * serviceMultiplier * 1.15),
     })),
     modelVersion: 'mock-v1.0',
     confidenceLevel: 0.95,
@@ -108,23 +115,29 @@ function adaptMlMetrics(): MlMetricsResponse {
   }
 }
 
-function adaptServiceBreakdown(): ServiceBreakdownResponse {
+function adaptServiceBreakdown(days?: number, service?: string): ServiceBreakdownResponse {
+  // If filtering to a specific service, only return that service
+  let services = SERVICE_SPEND;
+  if (service && service !== 'all') {
+      services = services.filter((s: { name: string }) => s.name === service);
+  }
+
   return {
-    services: SERVICE_SPEND.map(
+    services: services.map(
       (s: { name: string; cost: number; pct: number; color: string }) => ({
         name: s.name,
-        cost: s.cost,
+        cost: s.cost * (days === 7 ? 0.25 : days === 90 ? 3 : 1), // Fake scaling based on days
         percentage: s.pct,
         color: s.color,
         trend: s.cost > 5000 ? ('up' as const) : ('down' as const),
         trendValue: `${Math.round(Math.random() * 10 + 2)}%`,
       }),
     ),
-    total: SERVICE_SPEND.reduce(
-      (sum: number, s: { cost: number }) => sum + s.cost,
+    total: services.reduce(
+      (sum: number, s: { cost: number }) => sum + s.cost * (days === 7 ? 0.25 : days === 90 ? 3 : 1),
       0,
     ),
-    period: 'Last 30 days',
+    period: `Last ${days || 30} days`,
   }
 }
 
@@ -174,13 +187,13 @@ function adaptTopResources(): TopResourcesResponse {
  * Returns a complete DashboardData object constructed from mock data.
  * Mirrors the shape that dashboardApi.getAllDashboardData() would return.
  */
-export function getMockDashboardData(): DashboardData {
+export function getMockDashboardData(days?: number, service?: string): DashboardData {
   return {
     kpis: adaptKpis(),
-    historicalCosts: adaptHistoricalCosts(),
-    predictedCosts: adaptPredictedCosts(),
+    historicalCosts: adaptHistoricalCosts(days, service),
+    predictedCosts: adaptPredictedCosts(days, service),
     mlMetrics: adaptMlMetrics(),
-    serviceBreakdown: adaptServiceBreakdown(),
+    serviceBreakdown: adaptServiceBreakdown(days, service),
     alerts: adaptAlerts(),
     topResources: adaptTopResources(),
   }

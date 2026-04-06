@@ -12,6 +12,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { dashboardApi, ApiError } from '../services/apiClient'
 import type { DashboardData } from '../types/api.types'
 import { getMockDashboardData } from '../data/mockAdapter'
@@ -91,6 +92,14 @@ export function useDashboardData(
     maxConsecutiveErrors = 5,
   } = options
 
+  // ── URL Parameters ────────────────────────────────────────────────────────
+  const [searchParams] = useSearchParams()
+  const rangeParam = searchParams.get('range') || '30D'
+  const serviceParam = searchParams.get('service') || 'all'
+  
+  const days = rangeParam === '7D' ? 7 : rangeParam === '90D' ? 90 : 30;
+  const filterService = serviceParam === 'all' ? undefined : serviceParam;
+
   // ── State ─────────────────────────────────────────────────────────────────
   const [data, setData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -124,10 +133,10 @@ export function useDashboardData(
         if (useMockData) {
           // Simulate network delay for realistic UX
           await new Promise(r => setTimeout(r, 400))
-          dashboardData = getMockDashboardData()
+          dashboardData = getMockDashboardData(days, filterService)
         } else {
           try {
-            dashboardData = await dashboardApi.getAllDashboardData()
+            dashboardData = await dashboardApi.getAllDashboardData(days, filterService)
           } catch (apiErr) {
             // If the API is unreachable in dev mode, fall back to mock data
             if (import.meta.env.DEV) {
@@ -135,7 +144,7 @@ export function useDashboardData(
                 '[useDashboardData] API unreachable — falling back to mock data.',
                 apiErr,
               )
-              dashboardData = getMockDashboardData()
+              dashboardData = getMockDashboardData(days, filterService)
             } else {
               throw apiErr
             }
@@ -177,7 +186,7 @@ export function useDashboardData(
         isFetchingRef.current = false
       }
     },
-    [useMockData, maxConsecutiveErrors],
+    [useMockData, maxConsecutiveErrors, days, filterService],
   )
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -207,9 +216,7 @@ export function useDashboardData(
     return () => {
       isMountedRef.current = false
     }
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [fetchData])
 
   // ── Polling lifecycle ─────────────────────────────────────────────────────
   useEffect(() => {

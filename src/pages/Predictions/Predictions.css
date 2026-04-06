@@ -1,0 +1,31 @@
+/* =============================================
+   Predictions Page
+   ============================================= */
+
+.predictions-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.predictions__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-8);
+}
+
+.predictions__main-chart {
+    display: flex;
+    flex-direction: column;
+}
+
+.predictions__metrics-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1024px) {
+    .predictions__grid {
+        grid-template-columns: 1fr;
+    }
+}
