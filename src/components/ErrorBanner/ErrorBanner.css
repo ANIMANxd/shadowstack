@@ -1,0 +1,85 @@
+/* =============================================
+   ErrorBanner Component Styles
+   ============================================= */
+
+.error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: rgba(252, 129, 129, 0.06);
+    border: 1px solid rgba(252, 129, 129, 0.2);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-5);
+    animation: slide-in-banner 300ms ease-out;
+}
+
+@keyframes slide-in-banner {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-banner__icon {
+    color: var(--clr-accent-red);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.error-banner__content {
+    flex: 1;
+}
+
+.error-banner__title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-accent-red);
+    margin-bottom: 2px;
+}
+
+.error-banner__message {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-secondary);
+    line-height: 1.5;
+}
+
+.error-banner__actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.error-banner__btn {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.error-banner__btn--retry {
+    background: rgba(252, 129, 129, 0.15);
+    color: var(--clr-accent-red);
+    border: 1px solid rgba(252, 129, 129, 0.3);
+}
+
+.error-banner__btn--retry:hover {
+    background: rgba(252, 129, 129, 0.25);
+}
+
+.error-banner__btn--dismiss {
+    background: transparent;
+    color: var(--clr-text-muted);
+    border: 1px solid var(--clr-border);
+}
+
+.error-banner__btn--dismiss:hover {
+    color: var(--clr-text-secondary);
+    border-color: var(--clr-text-muted);
+}

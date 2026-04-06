@@ -1,12 +1,12 @@
 import { useState } from 'react'
+import { useDashboardData } from '../../hooks/useDashboardData'
 import D3Chart from '../../components/D3Chart/D3Chart'
-import {
-    KPI_DATA,
-    COST_TREND_DATA,
-    SERVICE_SPEND,
-    RECENT_ALERTS,
-    TOP_RESOURCES,
-} from '../../data/mockData'
+import ForecastChart from '../../components/ForecastChart/ForecastChart'
+import DonutChart from '../../components/DonutChart/DonutChart'
+import ModelMetrics from '../../components/ModelMetrics/ModelMetrics'
+import StatusBar from '../../components/StatusBar/StatusBar'
+import ErrorBanner from '../../components/ErrorBanner/ErrorBanner'
+import { DashboardSkeleton } from '../../components/Skeleton/Skeleton'
 import './Dashboard.css'
 
 // ── KPI Icons ─────────────────────────────────────────────────────────────────
@@ -68,24 +68,100 @@ export default function Dashboard() {
     const [activeRange, setActiveRange] = useState('30D')
     const ranges = ['7D', '30D', '90D']
 
+    // ── Real-time data from useDashboardData hook ─────────────────────────────
+    const {
+        data,
+        isLoading,
+        isRefreshing,
+        error,
+        lastUpdated,
+        isPolling,
+        errorCount,
+        refresh,
+        pause,
+        resume,
+        clearError,
+    } = useDashboardData({ pollingInterval: 30000 })
+
+    // ── Loading state ─────────────────────────────────────────────────────────
+    if (isLoading && !data) {
+        return (
+            <section aria-labelledby="dashboard-title">
+                <DashboardSkeleton />
+            </section>
+        )
+    }
+
+    // Destructure the live data (with safe fallbacks)
+    const kpis = data?.kpis?.kpis || []
+    const historicalCosts = data?.historicalCosts?.daily || []
+    const predictedCosts = data?.predictedCosts || { forecast: [], confidenceLevel: 0.95 }
+    const mlMetrics = data?.mlMetrics || { models: [], activeModelId: '' }
+    const services = data?.serviceBreakdown?.services || []
+    const serviceTotal = data?.serviceBreakdown?.total || 0
+    const alerts = data?.alerts?.alerts || []
+    const alertCount = data?.alerts?.activeCount || 0
+    const topResources = data?.topResources?.resources || []
+
+    // Convert historical cost data for D3Chart (needs Date objects)
+    const costTrendData = historicalCosts.map(d => ({
+        date: new Date(d.date),
+        value: d.value,
+    }))
+
     // Filter trend data by active range
-    const rangeMap = { '7D': 7, '30D': 30, '90D': 30 }
-    const visibleData = COST_TREND_DATA.slice(-rangeMap[activeRange])
+    const rangeMap = { '7D': 7, '30D': 30, '90D': 90 }
+    const visibleData = costTrendData.slice(-rangeMap[activeRange])
+
+    // Convert service data for DonutChart
+    const donutData = services.map(s => ({
+        name: s.name,
+        cost: s.cost,
+        percentage: s.percentage,
+        color: s.color,
+    }))
 
     return (
         <section aria-labelledby="dashboard-title">
+            {/* Status bar with polling controls */}
+            <StatusBar
+                isLoading={isLoading}
+                isRefreshing={isRefreshing}
+                isPolling={isPolling}
+                lastUpdated={lastUpdated}
+                errorCount={errorCount}
+                error={error}
+                onRefresh={refresh}
+                onPause={pause}
+                onResume={resume}
+            />
+
+            {/* Error banner (if any) */}
+            <ErrorBanner
+                error={error}
+                onDismiss={clearError}
+                onRetry={refresh}
+            />
+
             {/* Page header */}
             <header className="page-header">
                 <p className="page-header__eyebrow">Overview</p>
                 <h1 className="page-header__title" id="dashboard-title">Cost Intelligence</h1>
                 <p className="page-header__subtitle">
-                    Real-time cloud spend analytics and predictive forecasting &mdash; Feb 2026
+                    Real-time cloud spend analytics and predictive forecasting
+                    {lastUpdated && (
+                        <span className="page-header__timestamp">
+                            &nbsp;&mdash;&nbsp;{new Date(lastUpdated).toLocaleDateString('en-US', {
+                                month: 'short', year: 'numeric',
+                            })}
+                        </span>
+                    )}
                 </p>
             </header>
 
             {/* ── KPI Strip ── */}
             <div className="dashboard__kpi-grid" role="list" aria-label="Key performance indicators">
-                {KPI_DATA.map(kpi => (
+                {kpis.map(kpi => (
                     <KpiCard key={kpi.id} {...kpi} />
                 ))}
             </div>
@@ -124,7 +200,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Service breakdown */}
+                {/* Service breakdown – Donut chart + legend */}
                 <div className="widget">
                     <div className="widget__header">
                         <div className="widget__title-group">
@@ -132,15 +208,18 @@ export default function Dashboard() {
                             <h2 className="widget__title">By Service</h2>
                         </div>
                     </div>
-                    <div className="resource-list" role="list">
-                        {SERVICE_SPEND.map(s => (
-                            <div key={s.name} className="resource-list__item" role="listitem">
-                                <span className="resource-list__dot" style={{ background: s.color }} aria-hidden="true" />
-                                <span className="resource-list__name">{s.name}</span>
-                                <div className="resource-list__bar-wrap" aria-hidden="true">
-                                    <div className="resource-list__bar" style={{ width: `${s.pct}%`, background: s.color }} />
-                                </div>
-                                <span className="resource-list__cost">${s.cost.toLocaleString()}</span>
+                    <DonutChart
+                        data={donutData}
+                        total={serviceTotal}
+                        label="Total Spend"
+                    />
+                    {/* Legend below donut */}
+                    <div className="donut-legend" role="list">
+                        {services.map(s => (
+                            <div key={s.name} className="donut-legend__item" role="listitem">
+                                <span className="donut-legend__dot" style={{ background: s.color }} />
+                                <span className="donut-legend__name">{s.name}</span>
+                                <span className="donut-legend__value">${s.cost.toLocaleString()}</span>
                             </div>
                         ))}
                     </div>
@@ -148,22 +227,54 @@ export default function Dashboard() {
 
             </div>
 
-            {/* ── Bottom Row ── */}
-            <div className="dashboard__bottom-row">
+            {/* ── Middle Row: Forecast + ML Metrics ── */}
+            <div className="dashboard__mid-row">
 
-                {/* Forecast placeholder */}
+                {/* ML forecast chart */}
                 <div className="widget">
                     <div className="widget__header">
                         <div className="widget__title-group">
                             <p className="widget__label">ML Forecast</p>
                             <h2 className="widget__title">30-Day Prediction</h2>
-                            <p className="widget__subtitle">Upcoming connect</p>
+                            <p className="widget__subtitle">
+                                {predictedCosts.forecast.length > 0
+                                    ? `Model: ${data?.predictedCosts?.modelVersion || 'Unknown'}`
+                                    : 'Awaiting model data'}
+                            </p>
                         </div>
                     </div>
                     <div className="widget__chart-area">
-                        <div className="placeholder-shimmer" data-label="📈  Predictive chart coming soon" />
+                        {predictedCosts.forecast.length > 0 ? (
+                            <ForecastChart
+                                data={predictedCosts.forecast}
+                                historical={historicalCosts}
+                                color="#9f7aea"
+                                confidence={predictedCosts.confidenceLevel}
+                            />
+                        ) : (
+                            <div className="placeholder-shimmer" data-label="📈  Waiting for forecast data" />
+                        )}
                     </div>
                 </div>
+
+                {/* ML Model Metrics */}
+                <div className="widget">
+                    <div className="widget__header">
+                        <div className="widget__title-group">
+                            <p className="widget__label">Model Performance</p>
+                            <h2 className="widget__title">ML Metrics</h2>
+                        </div>
+                    </div>
+                    <ModelMetrics
+                        models={mlMetrics.models}
+                        activeModelId={mlMetrics.activeModelId}
+                    />
+                </div>
+
+            </div>
+
+            {/* ── Bottom Row ── */}
+            <div className="dashboard__bottom-row">
 
                 {/* Alerts */}
                 <div className="widget">
@@ -172,10 +283,12 @@ export default function Dashboard() {
                             <p className="widget__label">Anomaly Detection</p>
                             <h2 className="widget__title">Recent Alerts</h2>
                         </div>
-                        <span className="badge badge--red" aria-label="3 active alerts">3</span>
+                        <span className="badge badge--red" aria-label={`${alertCount} active alerts`}>
+                            {alertCount}
+                        </span>
                     </div>
                     <ul aria-label="Alert list">
-                        {RECENT_ALERTS.map(a => <AlertItem key={a.id} {...a} />)}
+                        {alerts.map(a => <AlertItem key={a.id} {...a} />)}
                     </ul>
                 </div>
 
@@ -188,7 +301,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="resource-list" role="list">
-                        {TOP_RESOURCES.map(r => (
+                        {topResources.map(r => (
                             <div key={r.id} className="resource-list__item" role="listitem">
                                 <span className="resource-list__dot" style={{ background: r.color }} aria-hidden="true" />
                                 <span className="resource-list__name">
@@ -196,7 +309,7 @@ export default function Dashboard() {
                                     {r.name}
                                 </span>
                                 <div className="resource-list__bar-wrap" aria-hidden="true">
-                                    <div className="resource-list__bar" style={{ width: `${r.pct}%`, background: r.color }} />
+                                    <div className="resource-list__bar" style={{ width: `${r.percentage}%`, background: r.color }} />
                                 </div>
                                 <span className="resource-list__cost">{r.cost}</span>
                             </div>
