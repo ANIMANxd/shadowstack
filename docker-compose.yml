@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: shadow_user
+      POSTGRES_PASSWORD: shadow_pass
+      POSTGRES_DB: shadowstack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://shadow_user:shadow_pass@db:5432/shadowstack_db
+    depends_on:
+      - db
+
+  frontend:
+    # Placeholder for Sanay to satisfy PBI-004
+    image: node:18-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    command: sh -c "echo 'Frontend container ready' && tail -f /dev/null"
+
+volumes:
+  postgres_data:
