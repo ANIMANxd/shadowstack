@@ -1,3 +1,4 @@
+import useDashboardData from '../../hooks/useDashboardData'
 import './CostAnalysis.css'
 
 /**
@@ -7,6 +8,24 @@ import './CostAnalysis.css'
  * with drill-down by repository and time range.
  */
 export default function CostAnalysis() {
+  const { data, isLoading, error } = useDashboardData()
+
+  if (isLoading && !data) {
+    return (
+      <section className="cost-analysis-loading" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }} aria-live="polite">
+        <div className="spinner-large" aria-label="Loading cost data..." />
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <h2>Error loading cost data</h2>
+        <p>{error.message}</p>
+      </div>
+    )
+  }
   return (
     <section aria-labelledby="costs-title">
       <header className="page-header">

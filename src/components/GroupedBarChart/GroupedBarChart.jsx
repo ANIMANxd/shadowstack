@@ -145,6 +145,7 @@ export default function GroupedBarChart({
                 tooltipEl.classList.add('hidden')
             })
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, dims, colors])
 
     return (

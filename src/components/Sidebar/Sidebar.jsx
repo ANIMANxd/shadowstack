@@ -106,7 +106,7 @@ export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
             <nav className="sidebar__inner">
                 {/* Primary navigation */}
                 <span className="sidebar__section-label">Main</span>
-                {PRIMARY_NAV.map(({ to, label, Icon }) => (
+                {PRIMARY_NAV.map(({ to, label, Icon }) => ( // eslint-disable-line no-unused-vars
                     <NavLink
                         key={to}
                         to={to}
@@ -125,7 +125,7 @@ export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
 
                 {/* Secondary navigation */}
                 <span className="sidebar__section-label">Monitor</span>
-                {SECONDARY_NAV.map(({ to, label, Icon, count }) => (
+                {SECONDARY_NAV.map(({ to, label, Icon, count }) => ( // eslint-disable-line no-unused-vars
                     <NavLink
                         key={to}
                         to={to}
@@ -147,7 +147,7 @@ export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
                 <div className="sidebar__divider" role="separator" />
 
                 {/* Tertiary */}
-                {TERTIARY_NAV.map(({ to, label, Icon }) => (
+                {TERTIARY_NAV.map(({ to, label, Icon }) => ( // eslint-disable-line no-unused-vars
                     <NavLink
                         key={to}
                         to={to}

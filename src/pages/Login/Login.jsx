@@ -139,7 +139,7 @@ export default function Login() {
 
         {/* Feature highlights */}
         <div className="login-card__features">
-          {FEATURES.map(({ Icon, title, desc }) => (
+          {FEATURES.map(({ Icon, title, desc }) => ( // eslint-disable-line no-unused-vars
             <div className="login-feature" key={title}>
               <div className="login-feature__icon">
                 <Icon />

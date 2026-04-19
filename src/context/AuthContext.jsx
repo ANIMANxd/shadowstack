@@ -92,6 +92,7 @@ export function AuthProvider({ children }) {
  * useAuth – convenience hook to consume the auth context.
  * Throws if used outside <AuthProvider>.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) {
