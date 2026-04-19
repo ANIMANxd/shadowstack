@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import D3Chart from '../../components/D3Chart/D3Chart'
-import {
-    KPI_DATA,
-    COST_TREND_DATA,
-    SERVICE_SPEND,
-    RECENT_ALERTS,
-    TOP_RESOURCES,
-} from '../../data/mockData'
+import useDashboardData from '../../hooks/useDashboardData'
 import './Dashboard.css'
 
 // ── KPI Icons ─────────────────────────────────────────────────────────────────
@@ -67,10 +61,33 @@ function AlertItem({ severity, message, time }) {
 export default function Dashboard() {
     const [activeRange, setActiveRange] = useState('30D')
     const ranges = ['7D', '30D', '90D']
+    const { data, isLoading, error } = useDashboardData()
 
-    // Filter trend data by active range
+    if (isLoading && !data) {
+        return (
+            <section className="dashboard-loading" aria-live="polite">
+                <div className="spinner-large" aria-label="Loading dashboard data..." />
+            </section>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="dashboard-error">
+                <h2>Error loading dashboard</h2>
+                <p>{error.message}</p>
+            </div>
+        )
+    }
+
+    // Filter trend data by active range safely
     const rangeMap = { '7D': 7, '30D': 30, '90D': 30 }
-    const visibleData = COST_TREND_DATA.slice(-rangeMap[activeRange])
+    const visibleData = data?.historicalCosts ? data.historicalCosts.slice(-rangeMap[activeRange]) : []
+
+    const kpiData = data?.kpis || []
+    const serviceSpend = data?.serviceBreakdown || []
+    const recentAlerts = data?.alerts || []
+    const topResources = data?.topResources || []
 
     return (
         <section aria-labelledby="dashboard-title">
@@ -85,7 +102,7 @@ export default function Dashboard() {
 
             {/* ── KPI Strip ── */}
             <div className="dashboard__kpi-grid" role="list" aria-label="Key performance indicators">
-                {KPI_DATA.map(kpi => (
+                {kpiData.map(kpi => (
                     <KpiCard key={kpi.id} {...kpi} />
                 ))}
             </div>
@@ -133,7 +150,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="resource-list" role="list">
-                        {SERVICE_SPEND.map(s => (
+                        {serviceSpend.map(s => (
                             <div key={s.name} className="resource-list__item" role="listitem">
                                 <span className="resource-list__dot" style={{ background: s.color }} aria-hidden="true" />
                                 <span className="resource-list__name">{s.name}</span>
@@ -175,7 +192,7 @@ export default function Dashboard() {
                         <span className="badge badge--red" aria-label="3 active alerts">3</span>
                     </div>
                     <ul aria-label="Alert list">
-                        {RECENT_ALERTS.map(a => <AlertItem key={a.id} {...a} />)}
+                        {recentAlerts.map(a => <AlertItem key={a.id} {...a} />)}
                     </ul>
                 </div>
 
@@ -188,7 +205,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="resource-list" role="list">
-                        {TOP_RESOURCES.map(r => (
+                        {topResources.map(r => (
                             <div key={r.id} className="resource-list__item" role="listitem">
                                 <span className="resource-list__dot" style={{ background: r.color }} aria-hidden="true" />
                                 <span className="resource-list__name">

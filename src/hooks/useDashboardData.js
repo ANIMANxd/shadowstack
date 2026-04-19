@@ -1,21 +1,9 @@
 /**
  * useDashboardData.js – Custom React hook for real-time dashboard updates.
- *
- * ┌─────────────────────────────────────────────────────────┐
- * │  PBI-040: Real-Time Dashboard Updates                   │
- * │  • 30-second configurable polling interval              │
- * │  • Loading / error / stale state management             │
- * │  • Graceful fallback to mock data during development    │
- * │  • Manual refresh & pause/resume controls               │
- * │  • Automatic cleanup on unmount                         │
- * └─────────────────────────────────────────────────────────┘
- *
- * NOTE: This hook is ready for Sprint 5 API integration.
- * Currently returns mock data from src/data/mockData.js.
- * When the backend is live, swap the fetch call to use apiClient.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import apiClient, { ApiError } from '../services/apiClient'
 import {
   KPI_DATA,
   COST_TREND_DATA,
@@ -24,15 +12,10 @@ import {
   TOP_RESOURCES,
 } from '../data/mockData'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
 const DEFAULT_POLLING_MS = Number(
   import.meta.env.VITE_POLLING_INTERVAL_MS || '30000',
 )
 
-/**
- * Build a mock dashboard payload from the local mock data.
- */
 function getMockDashboardData() {
   return {
     kpis: KPI_DATA,
@@ -40,10 +23,14 @@ function getMockDashboardData() {
     serviceBreakdown: SERVICE_SPEND,
     alerts: RECENT_ALERTS,
     topResources: TOP_RESOURCES,
+    // Add mock PRs for predictions if not available
+    predictions: [
+      { id: '#342', title: 'feat: add Redis caching layer', predicted: '+$32/mo', risk: 'medium', author: 'dev-user' },
+      { id: '#339', title: 'refactor: migrate to ARM instances', predicted: '-$145/mo', risk: 'low', author: 'dev-user' },
+      { id: '#337', title: 'feat: real-time WebSocket notifications', predicted: '+$67/mo', risk: 'high', author: 'dev-user' },
+    ]
   }
 }
-
-// ── Hook implementation ───────────────────────────────────────────────────────
 
 export function useDashboardData(options = {}) {
   const {
@@ -52,7 +39,6 @@ export function useDashboardData(options = {}) {
     maxConsecutiveErrors = 5,
   } = options
 
-  // ── State ─────────────────────────────────────────────────────────────────
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -61,12 +47,10 @@ export function useDashboardData(options = {}) {
   const [isPolling, setIsPolling] = useState(autoStart)
   const [errorCount, setErrorCount] = useState(0)
 
-  // ── Refs ──────────────────────────────────────────────────────────────────
   const intervalRef = useRef(null)
   const isMountedRef = useRef(true)
   const isFetchingRef = useRef(false)
 
-  // ── Fetch function ────────────────────────────────────────────────────────
   const fetchData = useCallback(
     async (isBackground = false) => {
       if (isFetchingRef.current) return
@@ -79,9 +63,18 @@ export function useDashboardData(options = {}) {
       }
 
       try {
-        // Simulate network delay for realistic UX
-        await new Promise((r) => setTimeout(r, 300))
-        const dashboardData = getMockDashboardData()
+        const repo = localStorage.getItem('connected_repo')
+        
+        // PBI-063: Query real backend data scoped to the connected repository
+        const [predictionsRes, costsRes] = await Promise.all([
+          apiClient.get('/predictions', { params: { repository: repo } }),
+          apiClient.get('/costs/history', { params: { repository: repo } })
+        ])
+
+        const dashboardData = {
+          ...costsRes.data,
+          predictions: predictionsRes.data?.predictions || []
+        }
 
         if (isMountedRef.current) {
           setData(dashboardData)
@@ -90,15 +83,32 @@ export function useDashboardData(options = {}) {
           setLastUpdated(new Date().toISOString())
         }
       } catch (err) {
-        if (isMountedRef.current) {
-          setError(err instanceof Error ? err : new Error(String(err)))
-          setErrorCount((prev) => {
-            const next = prev + 1
-            if (next >= maxConsecutiveErrors) {
-              setIsPolling(false)
-            }
-            return next
-          })
+        // Fallback to mock data strictly ONLY on 500 or Network Errors
+        const isNetworkOrServerError =
+          err?.status === 0 || 
+          err?.status >= 500 || 
+          err?.code === 'ERR_NETWORK' ||
+          err instanceof ApiError && err.status >= 500
+
+        if (import.meta.env.DEV && isNetworkOrServerError) {
+          console.warn('[useDashboardData] Backend unreachable — falling back to mock data.')
+          if (isMountedRef.current) {
+            setData(getMockDashboardData())
+            setError(null)
+            setErrorCount(0)
+            setLastUpdated(new Date().toISOString())
+          }
+        } else {
+          if (isMountedRef.current) {
+            setError(err instanceof Error ? err : new Error(String(err)))
+            setErrorCount((prev) => {
+              const next = prev + 1
+              if (next >= maxConsecutiveErrors) {
+                setIsPolling(false)
+              }
+              return next
+            })
+          }
         }
       } finally {
         if (isMountedRef.current) {
@@ -111,7 +121,6 @@ export function useDashboardData(options = {}) {
     [maxConsecutiveErrors],
   )
 
-  // ── Actions ───────────────────────────────────────────────────────────────
   const refresh = useCallback(async () => {
     await fetchData(!!data)
   }, [fetchData, data])
@@ -126,7 +135,6 @@ export function useDashboardData(options = {}) {
     setErrorCount(0)
   }, [])
 
-  // ── Initial fetch ─────────────────────────────────────────────────────────
   useEffect(() => {
     isMountedRef.current = true
     fetchData(false)
@@ -135,7 +143,6 @@ export function useDashboardData(options = {}) {
     }
   }, [fetchData])
 
-  // ── Polling lifecycle ─────────────────────────────────────────────────────
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -154,7 +161,6 @@ export function useDashboardData(options = {}) {
     }
   }, [isPolling, pollingInterval, fetchData])
 
-  // ── Pause polling when tab is hidden ──────────────────────────────────────
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {

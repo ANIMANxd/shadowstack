@@ -7,15 +7,22 @@ import './Predictions.css'
  * infrastructure cost impact before merge.
  */
 
-const MOCK_PRS = [
-  { id: '#342', title: 'feat: add Redis caching layer', predicted: '+$32/mo', risk: 'medium', author: 'dev-user' },
-  { id: '#339', title: 'refactor: migrate to ARM instances', predicted: '-$145/mo', risk: 'low', author: 'dev-user' },
-  { id: '#337', title: 'feat: real-time WebSocket notifications', predicted: '+$67/mo', risk: 'high', author: 'dev-user' },
-]
+import useDashboardData from '../../hooks/useDashboardData'
 
 const riskClass = { high: 'badge--red', medium: 'badge--amber', low: 'badge--green' }
 
 export default function Predictions() {
+  const { data, isLoading } = useDashboardData()
+  const prs = data?.predictions || []
+
+  if (isLoading && !data) {
+    return (
+      <section className="predictions-loading" aria-live="polite">
+        <div className="spinner-large" aria-label="Loading predictions data..." />
+      </section>
+    )
+  }
+
   return (
     <section aria-labelledby="predict-title">
       <header className="page-header">
@@ -47,19 +54,27 @@ export default function Predictions() {
               </tr>
             </thead>
             <tbody>
-              {MOCK_PRS.map((pr) => (
-                <tr key={pr.id}>
-                  <td className="predictions__pr-id">{pr.id}</td>
-                  <td>{pr.title}</td>
-                  <td className="predictions__author">{pr.author}</td>
-                  <td className={`predictions__impact ${pr.predicted.startsWith('+') ? 'predictions__impact--increase' : 'predictions__impact--decrease'}`}>
-                    {pr.predicted}
-                  </td>
-                  <td>
-                    <span className={`badge ${riskClass[pr.risk]}`}>{pr.risk}</span>
+              {prs.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', color: 'var(--clr-text-muted)', padding: 'var(--space-6)' }}>
+                    No predictions available.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                prs.map((pr) => (
+                  <tr key={pr.id}>
+                    <td className="predictions__pr-id">{pr.id}</td>
+                    <td>{pr.title}</td>
+                    <td className="predictions__author">{pr.author}</td>
+                    <td className={`predictions__impact ${pr.predicted?.startsWith('+') ? 'predictions__impact--increase' : 'predictions__impact--decrease'}`}>
+                      {pr.predicted}
+                    </td>
+                    <td>
+                      <span className={`badge ${riskClass[pr.risk]}`}>{pr.risk}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
