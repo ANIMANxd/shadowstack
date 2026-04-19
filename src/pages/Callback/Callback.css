@@ -1,0 +1,141 @@
+/* =============================================
+   OAuth Callback Page Styles – ShadowStack
+   ============================================= */
+
+.callback-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--clr-bg-deep);
+}
+
+.callback-card {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--space-10);
+    background: rgba(17, 24, 39, 0.78);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    animation: callback-enter 0.4s ease-out;
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes callback-enter {
+    0%   { opacity: 0; transform: scale(0.96); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Spinner ────────────────────────────────────────────────────────────── */
+.callback-spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto var(--space-6);
+    border: 3px solid var(--clr-bg-elevated);
+    border-top-color: var(--clr-primary);
+    border-radius: 50%;
+    animation: callback-spin 0.8s linear infinite;
+}
+
+@keyframes callback-spin {
+    to { transform: rotate(360deg); }
+}
+
+.callback-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.callback-card__message {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
+    line-height: 1.5;
+}
+
+/* ── Progress bar ───────────────────────────────────────────────────────── */
+.callback-progress {
+    margin-top: var(--space-6);
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: var(--clr-bg-elevated);
+    overflow: hidden;
+}
+
+.callback-progress__bar {
+    height: 100%;
+    width: 40%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--clr-primary), var(--clr-secondary));
+    animation: callback-progress-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes callback-progress-slide {
+    0%   { transform: translateX(-100%); }
+    50%  { transform: translateX(150%); }
+    100% { transform: translateX(350%); }
+}
+
+/* ── Error state ────────────────────────────────────────────────────────── */
+.callback-card--error {
+    border-color: rgba(252, 129, 129, 0.2);
+}
+
+.callback-error-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto var(--space-6);
+    border-radius: 50%;
+    background: rgba(252, 129, 129, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--clr-accent-red);
+}
+
+.callback-card__error-detail {
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--clr-bg-elevated);
+    font-size: var(--fs-xs);
+    color: var(--clr-accent-red);
+    font-family: monospace;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+.callback-card__retry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    background: var(--clr-bg-elevated);
+    color: var(--clr-text-primary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    border: 1px solid var(--clr-border);
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.callback-card__retry-btn:hover {
+    background: var(--clr-bg-hover);
+    border-color: var(--clr-border-accent);
+    transform: translateY(-1px);
+}
+
+.callback-card__retry-btn:active {
+    transform: translateY(0);
+}

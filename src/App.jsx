@@ -1,10 +1,33 @@
+import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
+import Login from './pages/Login/Login'
+import Callback from './pages/Callback/Callback'
 
 /**
  * App – root component.
- * Routing is handled inside Layout via React Router v6.
- * BrowserRouter is mounted in main.jsx.
+ *
+ * Top-level routing:
+ *  - /login    → public Login page (no sidebar/header)
+ *  - /callback → public OAuth callback handler
+ *  - /*        → protected dashboard shell (Layout with sidebar/header)
  */
 export default function App() {
-  return <Layout />
+  return (
+    <Routes>
+      {/* Public routes — no Layout shell */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/callback" element={<Callback />} />
+
+      {/* Protected routes — wrapped in Layout shell */}
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  )
 }

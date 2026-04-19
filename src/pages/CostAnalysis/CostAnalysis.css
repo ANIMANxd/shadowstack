@@ -1,0 +1,61 @@
+/* =============================================
+   Cost Analysis Page Styles
+   ============================================= */
+
+.cost-analysis__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.cost-analysis__card {
+    background: var(--clr-bg-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.cost-analysis__card:hover {
+    border-color: var(--clr-border-accent);
+    box-shadow: var(--shadow-glow);
+}
+
+.cost-analysis__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+
+.cost-analysis__card-label {
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
+    font-weight: var(--fw-medium);
+}
+
+.cost-analysis__card-icon {
+    font-size: 1.2rem;
+}
+
+.cost-analysis__card-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--clr-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.cost-analysis__card-delta {
+    font-size: var(--fs-xs);
+    color: var(--clr-text-muted);
+}
+
+.cost-analysis__card-delta--up {
+    color: var(--clr-accent-red);
+}
+
+.cost-analysis__card-delta--down {
+    color: var(--clr-accent-green);
+}
