@@ -1,0 +1,383 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{hyperref}
+\usepackage[most]{tcolorbox}
+\usepackage{helvet}
+\usepackage{enumitem}
+\usepackage{needspace}
+\renewcommand{\familydefault}{\sfdefault}
+
+\definecolor{primary}{HTML}{1A365D}
+\definecolor{secondary}{HTML}{2B6CB0}
+\definecolor{accent}{HTML}{E2E8F0}
+\definecolor{success}{HTML}{2F855A}
+\definecolor{warning}{HTML}{C05621}
+\definecolor{donecell}{HTML}{E6F4EA}
+\definecolor{newbg}{HTML}{EEF4FF}
+\definecolor{warnbg}{HTML}{FFFAF0}
+
+\titleformat{\section}{\Large\bfseries\color{primary}}{}{0em}{}[\color{primary}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{secondary}}{}{0em}{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\hypersetup{colorlinks=true, linkcolor=secondary, urlcolor=secondary}
+
+\newtcolorbox{highlightbox}[1][]{
+  colback=accent!30, colframe=primary,
+  fonttitle=\bfseries, coltitle=white,
+  title=#1, boxrule=1pt, arc=4pt,
+  after={\nobreak\vspace{0.4em}\noindent}
+}
+\newtcolorbox{warnbox}[1][]{
+  colback=warnbg, colframe=warning,
+  fonttitle=\bfseries, coltitle=white,
+  title=#1, boxrule=1pt, arc=4pt,
+  after={\nobreak\vspace{0.4em}\noindent}
+}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\ToDo}{\textcolor{secondary}{To Do}}
+\newcommand{\Done}{\textcolor{success}{\textbf{Done}}}
+\newcommand{\New}{\textcolor{warning}{\textbf{NEW}}}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{tcolorbox}[colback=primary, colframe=primary, arc=4pt, text fill]
+  \centering\color{white}\vspace{0.5em}
+  {\LARGE\bfseries SPRINT 4 BACKLOG}\\[0.4em]
+  {\Large\bfseries ShadowStack: Predictive Cloud Cost Optimizer}\\[0.4em]
+  \textit{FastAPI \;|\; PostgreSQL \;|\; React + Vite \;|\; D3.js \;|\; PyTorch \;|\; Docker}\\[0.3em]
+  {\normalsize Product Backlog v1.2 · Sprint 4 of 4 · Final Sprint}
+  \vspace{0.4em}
+\end{tcolorbox}
+
+\vspace{0.5em}
+\noindent
+\textbf{Project Team:} Aniruddha Bhide (Lead/Backend/ML), Sanay Krishna (Frontend/Docs)\\
+\textbf{Course:} BCA 6th Semester Project
+\hfill\textbf{Sprint Duration:} 06 Apr – 15 Apr 2026\\
+\textbf{Planned SP (original PBIs):} 30
+\hfill\textbf{New Scope (PBI-061–063):} +10\\
+\textbf{Total Sprint 4 SP:} \textbf{40}
+\hfill\textbf{Final Submission Deadline:} 15 April 2026
+
+\vspace{0.8em}
+
+\begin{highlightbox}[Sprint 4 Goal — Final Delivery]
+Deliver a fully integrated, tested, and documented system ready for academic evaluation. The end-to-end workflow — user logs in via GitHub OAuth → connects a repository → opens a PR → system analyses code and posts cost prediction → dashboard updates in real time — must be live and demonstrable within 30 seconds. All documentation must be 100\% complete. All six required demo scenarios must be rehearsed and ready.
+\end{highlightbox}
+
+\vspace{0.4em}
+\begin{warnbox}[New Scope — Identified at End of Sprint 3]
+Three new backlog items (PBI-061 to PBI-063) have been added based on gaps identified during Sprint 3. These were not in the original backlog but are \textbf{mandatory for the end-to-end demo} and have been formally added as new scope. They are marked \New{} in all tables below.\\[0.3em]
+\textbf{PBI-061:} GitHub OAuth Login (React + Vite) — blocks PBI-062 and the entire auth flow\\
+\textbf{PBI-062:} Settings Page / Repo Connect UI — blocks webhook registration from the frontend\\
+\textbf{PBI-063:} Wire Dashboard to Real Predictions Data — blocks Demo Scenarios 3, 4, and 5
+\end{warnbox}
+
+\vspace{0.8em}
+
+% ── Sprint 4 at a glance ──────────────────────────────────────────────────────
+\section{Sprint 4 At a Glance}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{|L{1.3cm}|X|L{2cm}|L{1.8cm}|L{1.3cm}|L{2cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Sprint}} &
+\textcolor{white}{\textbf{Workstream}} &
+\textcolor{white}{\textbf{Planned SP}} &
+\textcolor{white}{\textbf{Stories}} &
+\textcolor{white}{\textbf{Lead}} &
+\textcolor{white}{\textbf{Deadline}} \\ \hline
+S4 & New Scope: OAuth, Settings, Data Wiring (PBI-061–063)    & 10 &  3 & Both      & 10 Apr 2026 \\ \hline
+S4 & Integration \& E2E Workflow (PBI-047–051)                & 14 &  5 & Aniruddha & 12 Apr 2026 \\ \hline
+S4 & QA, Docs \& Final Report (PBI-052–055)                   &  9 &  4 & Aniruddha & 14 Apr 2026 \\ \hline
+S4 & UI Polish, Demo Prep \& Cleanup (PBI-056–060)            &  7 &  5 & Both      & 15 Apr 2026 \\ \hline
+\rowcolor{accent}
+   & \textbf{Total}                                            & \textbf{40} & \textbf{17} & & \textbf{15 Apr} \\ \hline
+\end{tabularx}
+
+\newpage
+
+% ── New Scope: PBI-061, 062, 063 ─────────────────────────────────────────────
+\needspace{20\baselineskip}
+\section{New Scope — OAuth, Settings \& Data Wiring}
+
+\subsection*{Both Members — Critical Path Blockers \hfill 10 SP}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.5cm}|L{3cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+\rowcolor{newbg}
+PBI-061 \New{} &
+GitHub OAuth Login &
+As a user, I want to log in to ShadowStack via my GitHub account so that my repositories and tokens are securely managed. &
+\texttt{/login} page with GitHub OAuth button; redirects to GitHub with \texttt{repo} + \texttt{admin:repo\_hook} scopes; \texttt{POST /api/auth/github} exchanges code for token; token stored; \texttt{/callback} page handles redirect; protected routes redirect unauthenticated users to \texttt{/login} &
+HIGH & 5 \\ \hline
+
+\rowcolor{newbg}
+PBI-062 \New{} &
+Settings Page / Repo Connect UI &
+As an authenticated user, I want a settings page where I can connect my GitHub repository so that ShadowStack can analyse my PRs. &
+\texttt{/settings} page with \texttt{owner/repo} text field and Connect button; button calls \texttt{POST /api/integrations/github/webhook} with repo + token; success/error feedback shown; connected repos listed &
+HIGH & 3 \\ \hline
+
+\rowcolor{newbg}
+PBI-063 \New{} &
+Wire Dashboard to Real Predictions Data &
+As a user, I want the dashboard charts to show real PR analysis results from my connected repository so that I can see actual cost predictions. &
+\texttt{useDashboardData.ts} passes connected repo as filter; \texttt{GET /api/predictions?repo=owner/repo} returns scoped data; grouped bar chart shows one bar per PR analysis; \texttt{mockAdapter} only activates when API is truly unreachable &
+HIGH & 2 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── Integration & E2E ─────────────────────────────────────────────────────────
+\needspace{18\baselineskip}
+\section{Integration \& End-to-End Workflow}
+
+\subsection*{Aniruddha Bhide — Integration \& Performance \hfill 14 SP}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.5cm}|L{3cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-047 &
+GitHub PR Comment Automation &
+As a developer, I want the system to auto-post a cost-prediction comment on each PR so that I get feedback without leaving GitHub. &
+On PR open/update: markdown cost table (baseline, predicted, delta, recommendations) posted to correct PR within 30 s; verified on live test repository &
+HIGH & 5 \\ \hline
+
+PBI-048 &
+End-to-End PR to Dashboard Workflow &
+As a developer, I want to open a PR and see results on the dashboard within 30 seconds so that the full pipeline is operational. &
+PR opened → webhook fires → HMAC validates → BackgroundTask runs → prediction stored → PR comment posted → dashboard polls and updates; all within 30 s; documented with screenshots &
+HIGH & 5 \\ \hline
+
+PBI-049 &
+Performance Optimisation \& Profiling &
+As a developer, I want critical paths profiled and bottlenecks resolved so that all SLO time targets are met. &
+PR analysis $<$30 s; API P95 $<$500 ms; dashboard load $<$2 s; profiling report committed to repo &
+HIGH & 2 \\ \hline
+
+PBI-050 &
+Final Docker Deployment Verification &
+As a developer, I want to confirm the full system starts from a clean clone with one command so that deployment is reproducible. &
+\texttt{git clone} + \texttt{docker compose up} = working system on a fresh machine; verified by Sanay independently &
+HIGH & 1 \\ \hline
+
+PBI-051 &
+API Documentation &
+As an evaluator, I want complete API documentation so that all endpoints are clearly understood. &
+All endpoints in OpenAPI at \texttt{/docs}; Postman collection exported; example requests and responses included &
+HIGH & 1 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── QA, Docs & Final Report ───────────────────────────────────────────────────
+\needspace{18\baselineskip}
+\section{QA, Documentation \& Final Report}
+
+\subsection*{Aniruddha Bhide — QA \& Documentation \hfill 9 SP}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.5cm}|L{3cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-052 &
+Integration Tests: Critical Workflows &
+As a QA engineer, I want automated integration tests covering the webhook-to-prediction path so that critical workflows are verified. &
+Covers: webhook → analysis → DB write → API response; all pass in CI; results documented in repo &
+HIGH & 3 \\ \hline
+
+PBI-053 &
+System Testing \& Validation &
+As a QA engineer, I want the system validated against all measurable criteria so that targets are demonstrably met. &
+Verified: ML MAE $<$15\%, PR response $<$30 s, load $<$2 s, uptime $\geq$95\%, coverage $\geq$70\%; validation report submitted &
+HIGH & 3 \\ \hline
+
+PBI-054 &
+Deployment Guide \& User Manual &
+As a user, I want step-by-step setup and usage documentation so that evaluators can run ShadowStack independently. &
+Docker setup, env vars, DB migration, test run; dashboard and GitHub integration usage guide included &
+HIGH & 1 \\ \hline
+
+PBI-055 &
+Final Project Report Compilation &
+As a team, I want a consolidated final report combining all documentation and results so that the project is ready for submission. &
+Includes: executive summary, architecture, ML results, test results, limitations, future scope; reviewed by both members &
+HIGH & 2 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── UI Polish, Demo & Cleanup ─────────────────────────────────────────────────
+\needspace{18\baselineskip}
+\section{UI Polish, Demo Preparation \& Code Cleanup}
+
+\subsection*{Sanay Krishna — UI Polish \& Demo}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.5cm}|L{3cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-057 &
+UI/UX Refinements \& Final Polish &
+As a user, I want the dashboard to feel polished and professional so that it makes a strong impression at evaluation. &
+Consistent colour scheme; no layout overflow; loading/error states on all async ops; cross-browser verified (Chrome, Firefox) &
+MED & 1 \\ \hline
+
+PBI-060 &
+Sprint 4 Retrospective \& Lessons Learned &
+As a team, I want a combined lessons-learned document from all four sprints so that Agile artefacts are complete. &
+Sprint 4 retrospective held; all-sprints document committed; included in final report appendix &
+MED & 1 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.6em}
+\subsection*{Both Members — Shared Ownership}
+
+\begin{tabularx}{\textwidth}{|L{1.5cm}|L{3cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-056 &
+Comprehensive Bug Fixing &
+As a team, I want all known bugs resolved before submission so that the system is stable during evaluation. &
+Zero open P1/P2 bugs; all issues closed; regression test added for each fix &
+HIGH & 2 \\ \hline
+
+PBI-058 &
+Demo Preparation \& Slides &
+As a team, I want a rehearsed demo and slide deck so that we can present all 6 scenarios confidently. &
+All 6 demo scenarios rehearsed $\geq$2 times; slide deck complete; backup screenshots prepared &
+HIGH & 2 \\ \hline
+
+PBI-059 &
+Code Cleanup \& Refactoring &
+As a developer, I want dead code removed and naming standardised so that the codebase is clean for submission. &
+No commented-out code; consistent naming (snake\_case Python, camelCase JS); no unresolved TODOs; linter passes &
+MED & 1 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── Success criteria ──────────────────────────────────────────────────────────
+\needspace{12\baselineskip}
+\section{Sprint 4 Success Criteria}
+
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|L{0.5cm}|X|L{3cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} &
+\textcolor{white}{\textbf{Criterion}} &
+\textcolor{white}{\textbf{Related PBIs}} \\ \hline
+1 & User can log in via GitHub OAuth and token is securely stored              & PBI-061 \\ \hline
+2 & User can connect a repository; webhook auto-registered on GitHub           & PBI-062, PBI-047 \\ \hline
+3 & Opening a PR triggers analysis, stores prediction, posts comment           & PBI-047, PBI-048 \\ \hline
+4 & Dashboard updates within 30 s of a PR being opened; shows real data        & PBI-048, PBI-063 \\ \hline
+5 & End-to-end pipeline verified: login → connect → PR → dashboard update     & PBI-048 \\ \hline
+6 & All unit and integration tests pass; coverage $\geq$70\%                  & PBI-052, PBI-053 \\ \hline
+7 & PR analysis response time $<$30 s; API P95 $<$500 ms; load $<$2 s        & PBI-049 \\ \hline
+8 & System starts from clean clone with \texttt{docker compose up}            & PBI-050 \\ \hline
+9 & All 6 demo scenarios rehearsed and ready for live demonstration            & PBI-058 \\ \hline
+10 & Final report and all documentation 100\% complete                         & PBI-055, PBI-054 \\ \hline
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── Demo scenarios ────────────────────────────────────────────────────────────
+\needspace{12\baselineskip}
+\section{Live Demo — Required Scenarios}
+
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|L{0.5cm}|X|L{3cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} &
+\textcolor{white}{\textbf{Scenario}} &
+\textcolor{white}{\textbf{Blocked Until}} \\ \hline
+1 & User logs in via GitHub OAuth; session token visible in browser             & PBI-061 \\ \hline
+2 & User connects \texttt{owner/repo}; webhook auto-registered on that repo     & PBI-062 \\ \hline
+3 & Developer opens a PR with Python code changes on the connected repo         & PBI-047, PBI-048 \\ \hline
+4 & System analyses code and posts a markdown cost-prediction comment on the PR & PBI-047 \\ \hline
+5 & Dashboard updates within 30 s showing real prediction data                  & PBI-063, PBI-048 \\ \hline
+6 & ML model performance metrics panel showing Accuracy, R², MAPE, MAE, RMSE   & Already built (S3) \\ \hline
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── DoD ───────────────────────────────────────────────────────────────────────
+\section{Definition of Done (Sprint 4)}
+
+A Sprint 4 item is \textbf{Done} when:
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item All acceptance criteria verified and signed off by item owner.
+  \item Code merged to \texttt{main} via a reviewed GitHub pull request.
+  \item Relevant unit/integration tests written and passing in CI.
+  \item No new ESLint (frontend) or Pylint (backend) errors introduced.
+  \item Feature demonstrated in the running Docker Compose environment.
+  \item Impacted documentation updated (README, API docs, or user guide).
+  \item Item marked Done on the Agile project board.
+\end{enumerate}
+
+\vspace{1.5em}
+\hrule
+\vspace{0.5em}
+\begin{center}
+\textit{ShadowStack — Sprint 4 Backlog · Product Backlog v1.2 · Apr 6 – Apr 15, 2026}\\
+\textit{Aniruddha Bhide (CU23BSC001A) · Sanay Krishna (CU23BCA0049A)}\\
+\textit{\textbf{Final Sprint. Final Deadline: 15 April 2026.}}
+\end{center}
+
+\end{document}

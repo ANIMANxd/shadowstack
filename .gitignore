@@ -19,6 +19,7 @@ Thumbs.db
 # ML Models (Too large for standard Git)
 ml_pipeline/models/*.pkl
 ml_pipeline/models/*.pth
+ml_pipeline/models/*.joblib
 
 # Jupyter
 .ipynb_checkpoints/

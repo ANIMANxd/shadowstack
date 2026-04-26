@@ -1,0 +1,307 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{hyperref}
+\usepackage[most]{tcolorbox}
+\usepackage{helvet}
+\usepackage{enumitem}
+\usepackage{needspace}
+\renewcommand{\familydefault}{\sfdefault}
+
+% ── Colours ───────────────────────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1A365D}
+\definecolor{secondary}{HTML}{2B6CB0}
+\definecolor{accent}{HTML}{E2E8F0}
+\definecolor{success}{HTML}{2F855A}
+\definecolor{warning}{HTML}{C05621}
+\definecolor{donecell}{HTML}{E6F4EA}
+\definecolor{warnbg}{HTML}{FFFAF0}
+
+% ── Formatting ────────────────────────────────────────────────────────────────
+\titleformat{\section}{\Large\bfseries\color{primary}}{}{0em}{}[\color{primary}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{secondary}}{}{0em}{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\hypersetup{colorlinks=true, linkcolor=secondary, urlcolor=secondary}
+
+\newtcolorbox{highlightbox}[1][]{
+  colback=accent!30, colframe=primary,
+  fonttitle=\bfseries, coltitle=white,
+  title=#1, boxrule=1pt, arc=4pt,
+  after={\nobreak\vspace{0.4em}\noindent}
+}
+\newtcolorbox{warnbox}[1][]{
+  colback=warnbg, colframe=warning,
+  fonttitle=\bfseries, coltitle=white,
+  title=#1, boxrule=1pt, arc=4pt,
+  after={\nobreak\vspace{0.4em}\noindent}
+}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\ToDo}{\textcolor{secondary}{To Do}}
+\newcommand{\Done}{\textcolor{success}{\textbf{Done}}}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+% ── Header ────────────────────────────────────────────────────────────────────
+\begin{tcolorbox}[colback=primary, colframe=primary, arc=4pt, text fill]
+  \centering\color{white}\vspace{0.5em}
+  {\LARGE\bfseries SPRINT 3 BACKLOG}\\[0.4em]
+  {\Large\bfseries ShadowStack: Predictive Cloud Cost Optimizer}\\[0.4em]
+  \textit{FastAPI \;|\; PostgreSQL \;|\; React + Vite \;|\; D3.js \;|\; PyTorch \;|\; Docker}\\[0.3em]
+  {\normalsize Product Backlog v1.2 · Sprint 3 of 4}
+  \vspace{0.4em}
+\end{tcolorbox}
+
+\vspace{0.5em}
+\noindent
+\textbf{Project Team:} Aniruddha Bhide (Lead/Backend/ML), Sanay Krishna (Frontend/Docs)\\
+\textbf{Course:} BCA 6th Semester Project
+\hfill\textbf{Sprint Duration:} 09 Mar – 05 Apr 2026\\
+\textbf{Total Planned SP:} 28
+\hfill\textbf{Lead:} Sanay Krishna
+
+\vspace{0.8em}
+
+\begin{highlightbox}[Sprint 3 Goal]
+Complete the React + Vite dashboard by connecting all four D3.js chart components to live backend APIs and implementing every required interactive visualisation. Aniruddha delivers the cost history endpoint for frontend consumption. Sanay leads all frontend implementation and owns QA documentation and Agile artefacts (redistributed from Arpita M).
+\end{highlightbox}
+
+\vspace{0.6em}
+
+% ── Field definitions ─────────────────────────────────────────────────────────
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|L{2.5cm}|L{11.5cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Field}} & \textcolor{white}{\textbf{Definition}} \\ \hline
+ID          & Unique backlog item identifier (PBI-033 to PBI-046) \\ \hline
+User Story  & \textit{As a [role], I want [goal], so that [benefit]} \\ \hline
+Priority    & HIGH = MVP-critical \quad MED = MVP, not blocking \\ \hline
+SP          & Story Points (Fibonacci: 1, 2, 3, 5, 8, 13) \\ \hline
+Owner       & Primary responsible team member \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.8em}
+
+% ── Sprint 3 at a glance ──────────────────────────────────────────────────────
+\needspace{12\baselineskip}
+\section{Sprint 3 At a Glance}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{|L{1.3cm}|X|L{2.2cm}|L{2.2cm}|L{1.3cm}|L{2cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{Sprint}} &
+\textcolor{white}{\textbf{Epic / Workstream}} &
+\textcolor{white}{\textbf{Planned SP}} &
+\textcolor{white}{\textbf{Stories}} &
+\textcolor{white}{\textbf{Lead}} &
+\textcolor{white}{\textbf{Deadline}} \\ \hline
+S3 & EP-8: Frontend Dashboard \& Charts  & 25 & 13 & Sanay     & 05 Apr 2026 \\ \hline
+S3 & EP-2/7: Backend Support             &  3 &  1 & Aniruddha & 05 Apr 2026 \\ \hline
+\rowcolor{accent}
+   & \textbf{Total}                       & \textbf{28} & \textbf{14} & & \\ \hline
+\end{tabularx}
+
+\vspace{0.5em}
+{\small \textsuperscript{$\dagger$} Items PBI-045 and PBI-046 were previously owned by Arpita M. Reassigned to Sanay Krishna effective 08 Mar 2026.}
+
+\newpage
+
+% ── EP-8: Sanay Krishna ───────────────────────────────────────────────────────
+\needspace{20\baselineskip}
+\section{EP-8 — Frontend Dashboard \& Charts}
+
+\subsection*{Sanay Krishna — Full Dashboard Implementation \hfill 25 SP}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.4cm}|L{3.2cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-033 &
+Axios API Integration Layer &
+As a frontend developer, I want a centralised Axios service layer so that all API calls have uniform error handling. &
+Axios instance with base URL from \texttt{VITE\_API\_BASE\_URL}; interceptors for 4xx/5xx; loading and error states per request; typed response models &
+HIGH & 2 \\ \hline
+
+PBI-034 &
+Cost Trend Line Chart &
+As a developer, I want an interactive line chart of historical and predicted costs so that I can identify cost patterns. &
+D3.js area/line chart; historical series converging into dotted ML predictions; gradient confidence interval; tooltips; 7d/30d/90d time-range selector &
+HIGH & 3 \\ \hline
+
+PBI-035 &
+Service Breakdown Donut Chart &
+As a developer, I want a donut chart breaking costs by service so that I can identify the most expensive components. &
+$\geq$3 segments; legend with percentages; tooltips; updates on filter change; data from backend \texttt{/api/predictions} &
+HIGH & 3 \\ \hline
+
+PBI-036 &
+Predicted vs.\ Actual Bar Chart &
+As a developer, I want a grouped bar chart comparing predicted and actual costs so that model accuracy is visually obvious. &
+Grouped bars per time bucket; variance \% shown; custom tooltip tracking over/under metrics; colour-coded above/below threshold &
+HIGH & 3 \\ \hline
+
+PBI-037 &
+ML Model Metrics Panel &
+As a system admin, I want a panel showing MAE, RMSE, and R\textsuperscript{2} for all models so that I can monitor prediction quality. &
+Accuracy \%, R² Score, MAPE, MAE, RMSE displayed as metric cards with animated progress bars; model version selector present &
+HIGH & 2 \\ \hline
+
+PBI-038 &
+Time-Range Date Filters &
+As a user, I want date-range controls on all charts so that I can zoom into specific time periods. &
+7d/30d/90d buttons update URL params (\texttt{?range=30D}); all charts re-fetch on param change; default 30 days; state persists across routes &
+MED & 2 \\ \hline
+
+PBI-039 &
+Interactive Filtering \& Sorting &
+As a user, I want to filter cost data by service and sort records so that I can focus on relevant data. &
+Cloud service dropdown updates URL param (\texttt{?service=EC2}); \texttt{mockAdapter.ts} mathematically slices data to match; combined filter + sort functional &
+MED & 2 \\ \hline
+
+PBI-040 &
+Real-Time Dashboard Updates &
+As a user, I want the dashboard to refresh automatically so that new PR analyses appear without a manual reload. &
+\texttt{useDashboardData.ts} polls every 30 s via \texttt{setInterval}; \texttt{StatusBar.jsx} shows live status + "Updated Xs ago" timestamp; Pause/Refresh controls functional &
+MED & 2 \\ \hline
+
+PBI-041 &
+Responsive UI \& Accessibility &
+As a user, I want the dashboard usable on desktop and mobile so that it is accessible from anywhere. &
+\texttt{ResizeObserver} wired to D3 chart containers; layout adapts 320 px–1920 px; WCAG AA contrast; tested on Chrome and Firefox &
+MED & 2 \\ \hline
+
+PBI-042 &
+Team Cost Dashboard View &
+As an engineering manager, I want a team-wide cost overview so that I can make informed budget decisions. &
+\texttt{Dashboard.jsx} at route \texttt{/} shows KPI summary cards; \texttt{CostAnalysis.jsx} (\texttt{/costs}) and \texttt{Predictions.jsx} (\texttt{/predict}) provide per-workstream drill-down &
+MED & 1 \\ \hline
+
+PBI-044 &
+Frontend Unit Tests (Vitest) &
+As a developer, I want unit tests for all key components so that UI regressions are caught early. &
+Vitest configured in \texttt{vite.config.js} with JSDOM; \texttt{setupTests.js} mocks \texttt{ResizeObserver}; tests for charts, filters, hook; \texttt{package.json} \texttt{"test": "vitest run"} &
+HIGH & 2 \\ \hline
+
+PBI-045\textsuperscript{$\dagger$} &
+Frontend Validation \& Test Case Docs &
+As a QA engineer, I want test cases documented for all Sprint 3 UI components so that validation is traceable. &
+Cases for each chart, filter, nav link, and API call; expected vs.\ actual results logged; stored in repo under \texttt{docs/} &
+MED & 1 \\ \hline
+
+PBI-046\textsuperscript{$\dagger$} &
+Sprint 3 Retrospective \& Standup Logs &
+As a team, I want standup logs and a retrospective at sprint end so that Agile artefacts stay current. &
+Daily standup logs updated throughout sprint; burndown chart updated; retrospective document committed within 24 h of sprint end &
+MED & 1 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.5em}
+{\small \textsuperscript{$\dagger$} Reassigned from Arpita M to Sanay Krishna.}
+
+\vspace{1em}
+
+% ── EP-2/7: Aniruddha Bhide ───────────────────────────────────────────────────
+\needspace{10\baselineskip}
+\section{EP-2/7 — Backend Support}
+
+\subsection*{Aniruddha Bhide — Cost History Endpoint \hfill 3 SP}
+
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|L{1.4cm}|L{3.2cm}|X|L{3cm}|L{1cm}|L{0.6cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{ID}} &
+\textcolor{white}{\textbf{Title}} &
+\textcolor{white}{\textbf{User Story}} &
+\textcolor{white}{\textbf{Acceptance Criteria}} &
+\textcolor{white}{\textbf{Pri.}} &
+\textcolor{white}{\textbf{SP}} \\ \hline
+
+PBI-043 &
+Cost History Retrieval Endpoint &
+As a frontend developer, I want \texttt{GET /api/predictions} so that charts display accurate prediction history. &
+Returns prediction records in descending chronological order; formatted timestamps; consumed by \texttt{useDashboardData.ts}; response $<$500 ms &
+HIGH & 2 \\ \hline
+
+\end{tabularx}
+
+\vspace{0.6em}
+\begin{warnbox}[Unplanned Backend Scope — Identified During Sprint 3]
+The following backend items were not in the original Sprint 3 backlog but are being delivered in Sprint 3 as they are critical path dependencies for Sprint 4. They are formally tracked here as additional scope.
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{GitHub Webhook HMAC hardening} — \texttt{X-Hub-Signature-256} validation; BackgroundTask inference to prevent GitHub timeout
+  \item \textbf{Automated PR comment posting} — \texttt{post\_github\_comment} helper using \texttt{urllib}; auto-triggered after prediction
+  \item \textbf{Dynamic OAuth token system} — \texttt{integrations} PostgreSQL table; \texttt{POST /api/integrations/github/webhook} endpoint; per-repo token storage replacing global \texttt{.env} token
+  \item \textbf{Frontend data endpoint} — \texttt{GET /api/predictions} with descending chronological ordering
+\end{itemize}
+These items are formally documented in the Sprint 3 Completion Report as unplanned scope.
+\end{warnbox}
+
+\vspace{0.8em}
+
+% ── Success criteria ──────────────────────────────────────────────────────────
+\needspace{10\baselineskip}
+\section{Sprint 3 Success Criteria}
+
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{|L{0.5cm}|X|L{3cm}|}
+\hline
+\rowcolor{primary}
+\textcolor{white}{\textbf{\#}} &
+\textcolor{white}{\textbf{Criterion}} &
+\textcolor{white}{\textbf{Verified By}} \\ \hline
+1 & All four D3.js visualisations render data and respond to filter changes & Sanay \\ \hline
+2 & Dashboard page load time $< 2$ seconds & Chrome DevTools \\ \hline
+3 & 30-second polling engine active; \texttt{StatusBar} shows live status & Manual test \\ \hline
+4 & URL filter state (\texttt{?range=\&service=}) persists across route changes & Manual test \\ \hline
+5 & Frontend unit test coverage $\geq 70\%$ on Sprint 3 modules (Vitest) & \texttt{vitest run --coverage} \\ \hline
+6 & \texttt{GET /api/predictions} returns data; consumed by \texttt{useDashboardData.ts} & Postman + browser \\ \hline
+7 & \texttt{mockAdapter} fallback activates when API is unreachable & Manual test (stop backend) \\ \hline
+8 & GitHub webhook HMAC validation and background task active & Test with simulated payload \\ \hline
+\end{tabularx}
+
+\vspace{0.8em}
+
+% ── Definition of done ────────────────────────────────────────────────────────
+\needspace{10\baselineskip}
+\section{Definition of Done (Sprint 3)}
+
+A Sprint 3 item is \textbf{Done} when:
+\begin{enumerate}[leftmargin=1.8em, itemsep=2pt]
+  \item All acceptance criteria verified and signed off by item owner.
+  \item Code merged to \texttt{main} via a reviewed GitHub pull request.
+  \item Relevant Vitest unit tests written and passing (\texttt{vitest run}).
+  \item No new ESLint errors introduced (\texttt{eslint src/}).
+  \item Feature renders correctly in the running Vite dev server (\texttt{localhost:5173}).
+  \item Impacted documentation updated (README or codebase map).
+  \item Item marked Done on the Agile project board.
+\end{enumerate}
+
+\vspace{1.5em}
+\hrule
+\vspace{0.5em}
+\begin{center}
+\textit{ShadowStack — Sprint 3 Backlog · Product Backlog v1.2 · Mar 9 – Apr 5, 2026}\\
+\textit{Aniruddha Bhide (CU23BSC001A) · Sanay Krishna (CU23BCA0049A)}
+\end{center}
+
+\end{document}

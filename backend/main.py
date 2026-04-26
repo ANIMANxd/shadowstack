@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status, Depends, HTTPException
+from fastapi import FastAPI, Request, status, Depends, HTTPException, BackgroundTasks, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
@@ -13,6 +13,13 @@ import torch
 import torch.nn as nn
 import os
 import logging
+import hmac
+import hashlib
+import json
+import urllib.request
+import urllib.error
+import urllib.parse
+from typing import Optional
 
 load_dotenv()  # loads backend/.env into os.environ
 
@@ -55,6 +62,42 @@ def get_db():
     finally:
         db.close()
 
+def post_github_comment(repo_full_name: str, pr_number: int, comment_body: str, db: Session):
+    """Posts a PR comment via the GitHub REST API using the user-provided DB token."""
+    try:
+        result = db.execute(text(
+            "SELECT github_access_token FROM integrations WHERE repository_full_name = :repo"
+        ), {"repo": repo_full_name}).fetchone()
+        
+        if not result:
+            logger.warning(f"No GitHub token found in DB for repository '{repo_full_name}', skipping comment.")
+            return False
+            
+        token = result[0]
+    except Exception as e:
+        logger.error(f"Failed to fetch GitHub token from DB: {e}")
+        return False
+
+    url = f"https://api.github.com/repos/{repo_full_name}/issues/{pr_number}/comments"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    data = json.dumps({"body": comment_body}).encode("utf-8")
+    
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as response:
+            if response.status == 201:
+                logger.info(f"✅ Successfully posted cost comment on {repo_full_name}#{pr_number}")
+                return True
+    except urllib.error.HTTPError as e:
+        logger.error(f"❌ Failed to post GitHub comment: {e.code} - {e.read().decode('utf-8')}")
+    except Exception as e:
+        logger.error(f"❌ Github API request error: {e}")
+    return False
+
 # --- Startup / Shutdown lifecycle ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,13 +128,22 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"❌ Could not load LSTM model from '{lstm_path}': {e}")
 
-    # Ensure predictions table exists (dev-mode safe — skips if DB offline)
+    # Ensure tables exist (dev-mode safe — skips if DB offline)
     try:
         with engine.connect() as conn:
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS integrations (
+                    id SERIAL PRIMARY KEY,
+                    repository_full_name VARCHAR(255) UNIQUE NOT NULL,
+                    github_access_token VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """))
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS predictions (
                     id                 SERIAL PRIMARY KEY,
                     pr_number          INTEGER,
+                    repository_full_name VARCHAR(255),
                     complexity_score   FLOAT,
                     resource_units     FLOAT,
                     service_name       VARCHAR(100),
@@ -103,6 +155,13 @@ async def lifespan(app: FastAPI):
                 )
             """))
             conn.commit()
+            
+            try:
+                conn.execute(text("ALTER TABLE predictions ADD COLUMN repository_full_name VARCHAR(255)"))
+                conn.commit()
+            except Exception:
+                pass
+                
             logger.info("✅ 'predictions' table ensured.")
     except Exception as e:
         logger.warning(f"⚠️  DB setup skipped (DB may be offline in dev mode): {e}")
@@ -129,6 +188,8 @@ app.add_middleware(
 
 class PredictRequest(BaseModel):
     pr_number: int = Field(..., example=101)
+    repository_full_name: Optional[str] = Field(None, example="user/repo",
+                                                description="GitHub 'owner/repo' required for PR commenting")
     complexity_score: float = Field(..., ge=1.0, le=10.0, example=5.5,
                                     description="AST-derived complexity score (1–10)")
     resource_units: float = Field(..., gt=0, example=200.0,
@@ -166,6 +227,13 @@ class ForecastResponse(BaseModel):
     model_version: str
     message: str
 
+class AuthGitHubRequest(BaseModel):
+    code: str
+
+class WebhookIntegrationRequest(BaseModel):
+    repository_full_name: str = Field(..., example="owner/repo")
+    github_access_token: str = Field(..., example="gho_1234567890abcdef")
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -174,6 +242,120 @@ class ForecastResponse(BaseModel):
 def read_root():
     return {"message": "Welcome to ShadowStack. Use /docs for the interactive API."}
 
+# Sprint 4 — PBI-061: GitHub OAuth Login Endpoint
+@app.post("/api/auth/github", status_code=status.HTTP_200_OK, tags=["auth"])
+def auth_github(payload: AuthGitHubRequest):
+    client_id = os.getenv("GITHUB_CLIENT_ID")
+    client_secret = os.getenv("GITHUB_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=500, detail="GitHub OAuth credentials not configured on backend.")
+        
+    url = "https://github.com/login/oauth/access_token"
+    headers = {"Accept": "application/json"}
+    data = urllib.parse.urlencode({
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "code": payload.code
+    }).encode("utf-8")
+    
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as response:
+            resp_data = json.loads(response.read().decode("utf-8"))
+            if "error" in resp_data:
+                raise HTTPException(status_code=400, detail=resp_data.get("error_description", "OAuth error"))
+            return {"access_token": resp_data.get("access_token"), "scope": resp_data.get("scope")}
+    except urllib.error.HTTPError as e:
+        logger.error(f"Failed to exchange OAuth code: {e}")
+        raise HTTPException(status_code=502, detail="OAuth exchange failed with GitHub API.")
+    except Exception as e:
+        logger.error(f"Failed to exchange OAuth code: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error during OAuth exchange.")
+
+# Sprint 3 — Post Webhook Integration Endpoint (Dynamic GitHub Token Support)
+@app.post("/api/integrations/github/webhook", status_code=status.HTTP_200_OK, tags=["integrations"])
+def connect_github_repository(request: Request, payload: WebhookIntegrationRequest, db: Session = Depends(get_db)):
+    """
+    Called by the Next.js Frontend. Securely stores the user's specific GitHub access 
+    token into PostgreSQL and automatically provisions a repository webhook.
+    """
+    repo = payload.repository_full_name
+    token = payload.github_access_token
+
+    # 1. Upsert token into our "integrations" table securely
+    try:
+        db.execute(text("""
+            INSERT INTO integrations (repository_full_name, github_access_token)
+            VALUES (:repo, :token)
+            ON CONFLICT (repository_full_name) 
+            DO UPDATE SET github_access_token = EXCLUDED.github_access_token
+        """), {"repo": repo, "token": token})
+        db.commit()
+    except Exception as e:
+        logger.error(f"Failed to upsert GitHub token for {repo}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database failure while saving integration."
+        )
+
+    # 2. Register Webhook dynamically on correct GitHub Repository
+    webhook_secret = os.getenv("GITHUB_WEBHOOK_SECRET", "dummy_local_secret")
+    
+    # We will build our webhook url using our server's domain/base URL
+    app_base_url = os.getenv("APP_DOMAIN", str(request.base_url).rstrip('/'))
+    webhook_url = f"{app_base_url}/webhook/github"
+
+    github_api_url = f"https://api.github.com/repos/{repo}/hooks"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    
+    # Constructing GitHub's required webhook payload shape
+    payload_data = json.dumps({
+        "name": "web",
+        "active": True,
+        "events": ["pull_request"],
+        "config": {
+            "url": webhook_url,
+            "content_type": "json",
+            "secret": webhook_secret
+        }
+    }).encode("utf-8")
+    
+    req = urllib.request.Request(github_api_url, data=payload_data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as response:
+            if response.status == 201:
+                logger.info(f"Successfully configured active webhook on {repo}.")
+                return {"message": f"Successfully connected webhook for {repo}."}
+    except urllib.error.HTTPError as e:
+        error_resp = e.read().decode('utf-8')
+        if e.code == 422 and "already exists" in error_resp.lower():
+            logger.info(f"Webhook already exists on '{repo}', updated database token anyway.")
+            return {"message": "Webhook already exists, token saved successfully."}
+        elif e.code == 404:
+            logger.error(f"GitHub repo not found (or token lacks permissions): {repo}")
+            raise HTTPException(status_code=404, detail="Repository not found or admin permissions needed.")
+        elif e.code == 401:
+            logger.error("GitHub access token provided was invalid or expired.")
+            raise HTTPException(status_code=401, detail="Invalid GitHub token provided.")
+            
+        logger.error(f"GitHub API Error configuring webhook: {e.code} - {error_resp}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, 
+            detail=f"Failed configuring GitHub webhook: {e.code}"
+        )
+    except Exception as e:
+        logger.error(f"Unforeseen Webhook configuration error on {repo}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error attempting to connect to GitHub API."
+        )
+
+    return {"message": "Token saved and integration complete."}
 
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["ops"])
 def health_check(db: Session = Depends(get_db)):
@@ -226,23 +408,36 @@ async def predict_cost(payload: PredictRequest, db: Session = Depends(get_db)):
     predicted_cost = round(float(ml_model.predict(input_df)[0]), 2)
     logger.info(f"🔮 PR #{payload.pr_number} prediction: ${predicted_cost:.2f}")
 
+    is_posted = False
+    if payload.repository_full_name:
+        comment_body = (
+            f"### 🤖 ShadowStack Cost Analysis\n"
+            f"Based on historical infrastructure metrics and code complexity, "
+            f"this Pull Request is predicted to incur the following monthly costs:\n\n"
+            f"**Predicted Cost:** `${predicted_cost:.2f}`\n\n"
+            f"_Service: {payload.service_name} | Type: {payload.resource_type}_"
+        )
+        is_posted = post_github_comment(payload.repository_full_name, payload.pr_number, comment_body, db)
+
     # Persist to DB — graceful failure keeps the API usable without a DB (dev mode)
     try:
         db.execute(text("""
             INSERT INTO predictions
-                (pr_number, complexity_score, resource_units,
-                 service_name, resource_type, predicted_cost_usd, model_version)
+                (pr_number, repository_full_name, complexity_score, resource_units,
+                 service_name, resource_type, predicted_cost_usd, model_version, is_comment_posted)
             VALUES
-                (:pr_number, :complexity_score, :resource_units,
-                 :service_name, :resource_type, :predicted_cost_usd, :model_version)
+                (:pr_number, :repository_full_name, :complexity_score, :resource_units,
+                 :service_name, :resource_type, :predicted_cost_usd, :model_version, :is_comment_posted)
         """), {
             "pr_number":          payload.pr_number,
+            "repository_full_name": payload.repository_full_name,
             "complexity_score":   payload.complexity_score,
             "resource_units":     payload.resource_units,
             "service_name":       payload.service_name,
             "resource_type":      payload.resource_type,
             "predicted_cost_usd": predicted_cost,
             "model_version":      MODEL_VERSION,
+            "is_comment_posted":  is_posted,
         })
         db.commit()
         logger.info(f"📝 Prediction saved to DB for PR #{payload.pr_number}")
@@ -307,16 +502,107 @@ async def forecast_costs(payload: ForecastRequest):
     )
 
 
+# Sprint 3 — GET Predictions Endpoint for Frontend Dashboard
+# Sprint 4 — PBI-063 update: added 'repo' filter to wire dashboard to real data
+@app.get("/api/predictions", status_code=status.HTTP_200_OK, tags=["ml"])
+def get_predictions(repo: Optional[str] = None, limit: int = 50, db: Session = Depends(get_db)):
+    """
+    Fetches the latest cost predictions to be displayed on the real-time frontend dashboard.
+    """
+    try:
+        query = """
+            SELECT id, pr_number, repository_full_name, complexity_score, resource_units, 
+                   service_name, resource_type, predicted_cost_usd, 
+                   model_version, is_comment_posted, created_at
+            FROM predictions
+        """
+        params = {"limit": limit}
+        
+        if repo:
+            query += " WHERE repository_full_name = :repo "
+            params["repo"] = repo
+            
+        query += " ORDER BY created_at DESC LIMIT :limit"
+        
+        result = db.execute(text(query), params)
+        
+        predictions = []
+        for row in result.mappings():
+            predictions.append({
+                "id": row["id"],
+                "pr_number": row["pr_number"],
+                "repository_full_name": row["repository_full_name"],
+                "complexity_score": row["complexity_score"],
+                "resource_units": row["resource_units"],
+                "service_name": row["service_name"],
+                "resource_type": row["resource_type"],
+                "predicted_cost_usd": row["predicted_cost_usd"],
+                "model_version": row["model_version"],
+                "is_comment_posted": row["is_comment_posted"],
+                "created_at": row["created_at"].isoformat() if row["created_at"] else None
+            })
+            
+        return {"data": predictions}
+    except Exception as e:
+        logger.error(f"Failed to fetch predictions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not fetch predictions from the database."
+        )
+
 # PBI-003: GitHub Webhook Listener (Sprint 1 — preserved)
 @app.post("/webhook/github", status_code=status.HTTP_202_ACCEPTED, tags=["webhooks"])
-async def github_webhook(request: Request):
-    """Receives GitHub PR events to trigger code analysis (full wiring in Sprint 3)."""
+async def github_webhook(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    x_github_event: str = Header(default="unknown"),
+    x_hub_signature_256: str = Header(default=None),
+    db: Session = Depends(get_db)
+):
+    """Receives GitHub PR events to trigger code analysis and ML prediction."""
+    body = await request.body()
+    
+    webhook_secret = os.getenv("GITHUB_WEBHOOK_SECRET")
+    if webhook_secret and x_hub_signature_256:
+        mac = hmac.new(
+            webhook_secret.encode("utf-8"),
+            msg=body,
+            digestmod=hashlib.sha256
+        )
+        expected_signature = f"sha256={mac.hexdigest()}"
+        if not hmac.compare_digest(expected_signature, x_hub_signature_256):
+            logger.warning("Invalid GitHub webhook signature")
+            raise HTTPException(status_code=401, detail="Invalid signature")
+
     try:
         payload = await request.json()
-        event_type = request.headers.get("X-GitHub-Event", "unknown")
         action = payload.get("action", "none")
-        logger.info(f"GitHub event: {event_type} | action: {action}")
-        return {"message": "Webhook received", "event": event_type, "action": action}
+        logger.info(f"GitHub event: {x_github_event} | action: {action}")
+        
+        if x_github_event == "pull_request" and action in ["opened", "synchronize", "reopened"]:
+            pr_number = payload.get("pull_request", {}).get("number")
+            repo_full_name = payload.get("repository", {}).get("full_name")
+            if pr_number:
+                logger.info(f"Scheduling prediction for PR #{pr_number} in {repo_full_name}")
+                predict_req = PredictRequest(
+                    pr_number=pr_number,
+                    repository_full_name=repo_full_name,
+                    complexity_score=5.5,
+                    resource_units=150.0,
+                    service_name="compute",
+                    resource_type="t3.medium"
+                )
+                
+                async def _background_predict(req: PredictRequest):
+                    db_session = SessionLocal()
+                    try:
+                        await predict_cost(req, db_session)
+                    finally:
+                        db_session.close()
+
+                background_tasks.add_task(_background_predict, predict_req)
+                
+        return {"message": "Webhook received", "event": x_github_event, "action": action}
     except Exception as e:
         logger.error(f"Webhook error: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload")
