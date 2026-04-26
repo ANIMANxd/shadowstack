@@ -1,0 +1,34 @@
+/* PlaceholderPage Styles */
+.placeholder-page {}
+
+.placeholder-page__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    padding-top: var(--space-12);
+}
+
+.placeholder-page__icon {
+    font-size: 3.5rem;
+    line-height: 1;
+}
+
+.placeholder-page__label {
+    font-size: var(--fs-base);
+    color: var(--clr-text-secondary);
+}
+
+.placeholder-page__grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-4);
+}
+
+@media (max-width: 640px) {
+    .placeholder-page__grid {
+        grid-template-columns: 1fr;
+    }
+}

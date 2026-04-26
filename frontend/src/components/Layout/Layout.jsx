@@ -1,0 +1,74 @@
+import { useState, useCallback } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import Header from '../Header/Header'
+import Sidebar from '../Sidebar/Sidebar'
+import './Layout.css'
+
+// Page imports
+import Dashboard from '../../pages/Dashboard/Dashboard'
+import PlaceholderPage from '../../pages/PlaceholderPage/PlaceholderPage'
+import CostAnalysis from '../../pages/CostAnalysis/CostAnalysis'
+import Predictions from '../../pages/Predictions/Predictions'
+import Settings from '../../pages/Settings/Settings'
+
+/**
+ * Layout ΓÇô root application shell
+ * Manages sidebar collapsed/mobile state and renders all routes.
+ */
+export default function Layout() {
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [mobileOpen, setMobileOpen] = useState(false)
+
+    const handleMenuClick = useCallback(() => {
+        setMobileOpen(prev => !prev)
+    }, [])
+
+    const handleSidebarToggle = useCallback(() => {
+        setSidebarCollapsed(prev => !prev)
+    }, [])
+
+    const handleOverlayClick = useCallback(() => {
+        setMobileOpen(false)
+    }, [])
+
+    return (
+        <div className="layout">
+            {/* Sticky header */}
+            <Header onMenuClick={handleMenuClick} />
+
+            <div className="layout__body">
+                {/* Navigation sidebar */}
+                <Sidebar
+                    isCollapsed={sidebarCollapsed}
+                    onToggle={handleSidebarToggle}
+                    mobileOpen={mobileOpen}
+                />
+
+                {/* Mobile backdrop overlay */}
+                <div
+                    className={`layout__overlay${mobileOpen ? ' layout__overlay--visible' : ''}`}
+                    onClick={handleOverlayClick}
+                    aria-hidden="true"
+                />
+
+                {/* Main scrollable content */}
+                <main
+                    className={`layout__main${sidebarCollapsed ? ' layout__main--collapsed' : ''}`}
+                    id="main-content"
+                >
+                    <div className="layout__content">
+                        <Routes>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/costs" element={<CostAnalysis />} />
+                            <Route path="/predict" element={<Predictions />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="/resources" element={<PlaceholderPage title="Resources" icon="≡ƒùä∩╕Å" description="Live inventory of all cloud resources with tagging and grouping." />} />
+                            <Route path="/alerts" element={<PlaceholderPage title="Alerts" icon="≡ƒöö" description="Budget threshold alerts and anomaly detection notifications." />} />
+                            <Route path="/reports" element={<PlaceholderPage title="Reports" icon="≡ƒôï" description="Scheduled cost reports and executive summary exports." />} />
+                        </Routes>
+                    </div>
+                </main>
+            </div>
+        </div>
+    )
+}
