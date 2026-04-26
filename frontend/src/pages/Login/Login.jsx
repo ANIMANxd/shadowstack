@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import './Login.css'
 
 /**
- * Login ΓÇô GitHub OAuth entry point for ShadowStack.
+ * Login – GitHub OAuth entry point for ShadowStack.
  *
  * Renders a polished sign-in page with:
  *  - Animated ambient background
@@ -25,7 +25,7 @@ const GITHUB_AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${en
   GITHUB_CLIENT_ID || '',
 )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}`
 
-// ΓöÇΓöÇ Inline SVGs ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Inline SVGs ────────────────────────────────────────────────────────────
 
 const GitHubMark = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -58,7 +58,7 @@ const ChartIcon = () => (
   </svg>
 )
 
-// ΓöÇΓöÇ Feature highlights for first-time users ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Feature highlights for first-time users ────────────────────────────────
 
 const FEATURES = [
   {
@@ -78,7 +78,7 @@ const FEATURES = [
   },
 ]
 
-// ΓöÇΓöÇ Component ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Component ──────────────────────────────────────────────────────────────
 
 export default function Login() {
   const { isAuthenticated } = useAuth()
@@ -110,7 +110,7 @@ export default function Login() {
 
       <div className="login-card">
         {/* Brand */}
-        <div className="login-card__logo" aria-hidden="true">ΓÜí</div>
+        <div className="login-card__logo" aria-hidden="true">⚡</div>
         <h1 className="login-card__title">ShadowStack</h1>
         <p className="login-card__subtitle">
           Predict the cost impact of every pull request before it merges.
@@ -130,8 +130,8 @@ export default function Login() {
 
         {/* Permission scopes */}
         <div className="login-card__scopes">
-          <span className="login-card__scope-tag">≡ƒöÆ repo</span>
-          <span className="login-card__scope-tag">≡ƒ¬¥ admin:repo_hook</span>
+          <span className="login-card__scope-tag">🔒 repo</span>
+          <span className="login-card__scope-tag">🪝 admin:repo_hook</span>
         </div>
 
         {/* Divider */}

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import './Sidebar.css'
 
-// ΓöÇΓöÇ Inline SVG Icons (no external deps) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Inline SVG Icons (no external deps) ────────────────────────────────────
 const DashboardIcon = () => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -69,7 +69,7 @@ const CollapseIcon = () => (
     </svg>
 )
 
-// ΓöÇΓöÇ Navigation Config ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Navigation Config ────────────────────────────────────────────────────────
 const PRIMARY_NAV = [
     { to: '/', label: 'Overview', Icon: DashboardIcon },
     { to: '/costs', label: 'Cost Analysis', Icon: CostIcon },
@@ -86,9 +86,9 @@ const TERTIARY_NAV = [
     { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ]
 
-// ΓöÇΓöÇ Component ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Component ────────────────────────────────────────────────────────────────
 /**
- * Sidebar ΓÇô collapsible navigation panel
+ * Sidebar – collapsible navigation panel
  * Props:
  *  - isCollapsed : boolean
  *  - onToggle    : () => void

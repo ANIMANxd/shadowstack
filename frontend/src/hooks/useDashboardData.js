@@ -1,5 +1,5 @@
 /**
- * useDashboardData.js ΓÇô Custom React hook for real-time dashboard updates.
+ * useDashboardData.js – Custom React hook for real-time dashboard updates.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -86,7 +86,7 @@ export function useDashboardData(options = {}) {
           err instanceof ApiError && err.status >= 500
 
         if (import.meta.env.DEV && isNetworkOrServerError) {
-          console.warn('[useDashboardData] Backend unreachable ΓÇö falling back to mock data.')
+          console.warn('[useDashboardData] Backend unreachable — falling back to mock data.')
           if (isMountedRef.current) {
             setData(getMockDashboardData())
             setError(null)

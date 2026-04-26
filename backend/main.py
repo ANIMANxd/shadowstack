@@ -342,23 +342,17 @@ def connect_github_repository(request: Request, payload: WebhookIntegrationReque
             logger.info(f"Webhook already exists on '{repo}', updated database token anyway.")
             return {"message": "Webhook already exists, token saved successfully."}
         elif e.code == 404:
-            logger.error(f"GitHub repo not found (or token lacks permissions): {repo}")
-            raise HTTPException(status_code=404, detail="Repository not found or admin permissions needed.")
+            logger.warning(f"GitHub repo not found (or token lacks permissions): {repo}")
+            return {"message": f"Repository '{repo}' not found on GitHub, but token was saved locally."}
         elif e.code == 401:
-            logger.error("GitHub access token provided was invalid or expired.")
-            raise HTTPException(status_code=401, detail="Invalid GitHub token provided.")
-            
-        logger.error(f"GitHub API Error configuring webhook: {e.code} - {error_resp}")
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, 
-            detail=f"Failed configuring GitHub webhook: {e.code}"
-        )
+            logger.warning("GitHub access token provided was invalid or expired.")
+            return {"message": "Invalid GitHub token, but repo connection was saved locally."}
+
+        logger.warning(f"GitHub API Error configuring webhook: {e.code} - {error_resp}")
+        return {"message": f"Token saved. GitHub webhook skipped (error {e.code})."}
     except Exception as e:
-        logger.error(f"Unforeseen Webhook configuration error on {repo}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error attempting to connect to GitHub API."
-        )
+        logger.warning(f"Webhook configuration error on {repo}: {e}")
+        return {"message": "Token saved. Webhook configuration skipped."}
 
     return {"message": "Token saved and integration complete."}
 

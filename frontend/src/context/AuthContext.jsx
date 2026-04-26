@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo } from 'react'
 
 /**
- * AuthContext ΓÇô Global authentication state for ShadowStack.
+ * AuthContext – Global authentication state for ShadowStack.
  *
  * Manages the full GitHub OAuth lifecycle:
  *  - Stores the access_token in React state + localStorage
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
   )
   const [user, setUserState] = useState(readStoredUser)
 
-  // ΓöÇΓöÇ Token management ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Token management ─────────────────────────────────────────────────────
   const setToken = useCallback((t) => {
     if (t) {
       localStorage.setItem(TOKEN_KEY, t)
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
     setTokenState(t)
   }, [])
 
-  // ΓöÇΓöÇ User profile management ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── User profile management ──────────────────────────────────────────────
   const setUser = useCallback((u) => {
     if (u) {
       localStorage.setItem(USER_KEY, JSON.stringify(u))
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
     setUserState(u)
   }, [])
 
-  // ΓöÇΓöÇ Logout ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Logout ───────────────────────────────────────────────────────────────
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
     setUserState(null)
   }, [])
 
-  // ΓöÇΓöÇ Context value (memoized to prevent unnecessary re-renders) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Context value (memoized to prevent unnecessary re-renders) ──────────
   const value = useMemo(
     () => ({
       token,
@@ -89,7 +89,7 @@ export function AuthProvider({ children }) {
 }
 
 /**
- * useAuth ΓÇô convenience hook to consume the auth context.
+ * useAuth – convenience hook to consume the auth context.
  * Throws if used outside <AuthProvider>.
  */
 // eslint-disable-next-line react-refresh/only-export-components

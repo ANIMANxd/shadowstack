@@ -2,7 +2,7 @@
    Dashboard Page Styles
    ============================================= */
 
-/* ΓöÇΓöÇ KPI Strip ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ── KPI Strip ─────────────────────────────── */
 .dashboard__kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -76,7 +76,7 @@
     color: var(--clr-accent-green);
 }
 
-/* ΓöÇΓöÇ Main Chart Area (large) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ── Main Chart Area (large) ───────────────── */
 .dashboard__charts-row {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -84,14 +84,14 @@
     margin-bottom: var(--space-5);
 }
 
-/* ΓöÇΓöÇ Bottom Row ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ── Bottom Row ────────────────────────────── */
 .dashboard__bottom-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: var(--space-5);
 }
 
-/* ΓöÇΓöÇ Widget Skeleton ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ── Widget Skeleton ───────────────────────── */
 .widget {
     background: var(--clr-bg-surface);
     border: 1px solid var(--clr-border);
@@ -209,7 +209,7 @@
     }
 }
 
-/* ΓöÇΓöÇ Resource table placeholder ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+/* ── Resource table placeholder ────────────── */
 .resource-list {
     display: flex;
     flex-direction: column;

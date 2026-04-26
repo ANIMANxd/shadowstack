@@ -12,7 +12,7 @@ import Predictions from '../../pages/Predictions/Predictions'
 import Settings from '../../pages/Settings/Settings'
 
 /**
- * Layout ΓÇô root application shell
+ * Layout – root application shell
  * Manages sidebar collapsed/mobile state and renders all routes.
  */
 export default function Layout() {
@@ -62,9 +62,9 @@ export default function Layout() {
                             <Route path="/costs" element={<CostAnalysis />} />
                             <Route path="/predict" element={<Predictions />} />
                             <Route path="/settings" element={<Settings />} />
-                            <Route path="/resources" element={<PlaceholderPage title="Resources" icon="≡ƒùä∩╕Å" description="Live inventory of all cloud resources with tagging and grouping." />} />
-                            <Route path="/alerts" element={<PlaceholderPage title="Alerts" icon="≡ƒöö" description="Budget threshold alerts and anomaly detection notifications." />} />
-                            <Route path="/reports" element={<PlaceholderPage title="Reports" icon="≡ƒôï" description="Scheduled cost reports and executive summary exports." />} />
+                            <Route path="/resources" element={<PlaceholderPage title="Resources" icon="🗄️" description="Live inventory of all cloud resources with tagging and grouping." />} />
+                            <Route path="/alerts" element={<PlaceholderPage title="Alerts" icon="🔔" description="Budget threshold alerts and anomaly detection notifications." />} />
+                            <Route path="/reports" element={<PlaceholderPage title="Reports" icon="📋" description="Scheduled cost reports and executive summary exports." />} />
                         </Routes>
                     </div>
                 </main>

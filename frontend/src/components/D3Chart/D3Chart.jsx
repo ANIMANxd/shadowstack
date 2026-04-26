@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import './D3Chart.css'
 
 /**
- * D3Chart ΓÇô a safe, reusable D3.js wrapper for React.
+ * D3Chart – a safe, reusable D3.js wrapper for React.
  *
  * React owns the DOM node lifecycle; D3 only operates INSIDE the svg ref,
  * preventing VirtualDOM conflicts.
@@ -27,7 +27,7 @@ export default function D3Chart({
     const tooltipRef = useRef(null)
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
-    // ΓöÇΓöÇ Observe container size ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Observe container size ──────────────────────────────────────────────
     useEffect(() => {
         if (!containerRef.current) return
         const observer = new ResizeObserver(([entry]) => {
@@ -38,7 +38,7 @@ export default function D3Chart({
         return () => observer.disconnect()
     }, [])
 
-    // ΓöÇΓöÇ D3 render ΓÇô runs whenever data or dimensions change ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── D3 render – runs whenever data or dimensions change ─────────────────
     useEffect(() => {
         const { width, height } = dimensions
         // Guard: nothing to render
@@ -58,7 +58,7 @@ export default function D3Chart({
             .append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`)
 
-        // ΓöÇΓöÇ Scales ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Scales ────────────────────────────────────────────────────────────
         const xScale = d3.scaleTime()
             .domain(d3.extent(data, d => d.date))
             .range([0, innerW])
@@ -70,7 +70,7 @@ export default function D3Chart({
             .range([innerH, 0])
             .nice()
 
-        // ΓöÇΓöÇ Grid ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Grid ──────────────────────────────────────────────────────────────
         g.append('g')
             .attr('class', 'grid')
             .call(
@@ -80,7 +80,7 @@ export default function D3Chart({
                     .tickFormat('')
             )
 
-        // ΓöÇΓöÇ Axes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Axes ──────────────────────────────────────────────────────────────
         g.append('g')
             .attr('class', 'axis axis--x')
             .attr('transform', `translate(0,${innerH})`)
@@ -108,7 +108,7 @@ export default function D3Chart({
             .attr('font-size', '10px')
             .text(label)
 
-        // ΓöÇΓöÇ Gradient definition ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Gradient definition ───────────────────────────────────────────────
         const gradId = `area-grad-${color.replace('#', '')}`
         const defs = svg.append('defs')
         const grad = defs.append('linearGradient')
@@ -119,7 +119,7 @@ export default function D3Chart({
         grad.append('stop').attr('offset', '0%').attr('stop-color', color).attr('stop-opacity', 0.35)
         grad.append('stop').attr('offset', '100%').attr('stop-color', color).attr('stop-opacity', 0.02)
 
-        // ΓöÇΓöÇ Area path ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Area path ─────────────────────────────────────────────────────────
         const areaGen = d3.area()
             .x(d => xScale(d.date))
             .y0(innerH)
@@ -132,7 +132,7 @@ export default function D3Chart({
             .attr('fill', `url(#${gradId})`)
             .attr('d', areaGen)
 
-        // ΓöÇΓöÇ Line path ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Line path ─────────────────────────────────────────────────────────
         const lineGen = d3.line()
             .x(d => xScale(d.date))
             .y(d => yScale(d.value))
@@ -144,7 +144,7 @@ export default function D3Chart({
             .attr('stroke', color)
             .attr('d', lineGen)
 
-        // ΓöÇΓöÇ Tooltip + bisector ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Tooltip + bisector ────────────────────────────────────────────────
         const bisect = d3.bisector(d => d.date).center
         const focusDot = g.append('circle')
             .attr('r', 5)

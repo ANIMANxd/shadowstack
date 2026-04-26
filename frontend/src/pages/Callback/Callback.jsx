@@ -5,7 +5,7 @@ import apiClient from '../../services/apiClient'
 import './Callback.css'
 
 /**
- * Callback ΓÇô GitHub OAuth redirect handler.
+ * Callback – GitHub OAuth redirect handler.
  *
  * After the user authorizes on GitHub, they are redirected here with
  * a ?code= query parameter. This component:
@@ -26,7 +26,7 @@ export default function Callback() {
   const navigate = useNavigate()
   const { setToken, setUser } = useAuth()
   const [error, setError] = useState(null)
-  const [status, setStatus] = useState('AuthenticatingΓÇª')
+  const [status, setStatus] = useState('Authenticating…')
   const hasExchanged = useRef(false)
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function Callback() {
 
     async function exchangeCode() {
       try {
-        setStatus('Exchanging authorization codeΓÇª')
+        setStatus('Exchanging authorization code…')
 
         const response = await apiClient.post('/api/auth/github', { code })
         const { access_token, user } = response.data
@@ -67,15 +67,15 @@ export default function Callback() {
           setUser(user)
         }
 
-        setStatus('Success! RedirectingΓÇª')
+        setStatus('Success! Redirecting…')
 
         // Brief pause so the user sees the success state
         setTimeout(() => {
           navigate('/', { replace: true })
         }, 400)
       } catch (err) {
-        // ΓöÇΓöÇ Dev-mode fallback ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-        // If the backend isn't running or OAuth isn't configured, simulate a successful exchange
+        // ── Dev-mode fallback ────────────────────────────────────────────
+        // If the backend isn't running yet, simulate a successful exchange
         // so the frontend auth flow can be tested independently.
         if (DEV_MODE && (isNetworkError(err) || err?.status === 500)) {
           console.warn(
@@ -91,7 +91,7 @@ export default function Callback() {
 
           setToken(mockToken)
           setUser(mockUser)
-          setStatus('Success! (mock mode) RedirectingΓÇª')
+          setStatus('Success! (mock mode) Redirecting…')
 
           setTimeout(() => {
             navigate('/', { replace: true })
@@ -114,12 +114,12 @@ export default function Callback() {
     navigate('/login', { replace: true })
   }
 
-  // ΓöÇΓöÇ Error state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Error state ────────────────────────────────────────────────────────
   if (error) {
     return (
       <div className="callback-page">
         <div className="callback-card callback-card--error">
-          <div className="callback-error-icon" aria-hidden="true">Γ£ò</div>
+          <div className="callback-error-icon" aria-hidden="true">✕</div>
           <h1 className="callback-card__title">Authentication Failed</h1>
           <p className="callback-card__message">
             We couldn&apos;t complete the GitHub sign-in.
@@ -131,14 +131,14 @@ export default function Callback() {
             onClick={handleRetry}
             type="button"
           >
-            ΓåÉ Back to Login
+            ← Back to Login
           </button>
         </div>
       </div>
     )
   }
 
-  // ΓöÇΓöÇ Loading state (exchanging code) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Loading state (exchanging code) ────────────────────────────────────
   return (
     <div className="callback-page">
       <div className="callback-card">
@@ -155,7 +155,7 @@ export default function Callback() {
   )
 }
 
-// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Helpers ──────────────────────────────────────────────────────────────
 
 /**
  * Detect if an error is a network / connection failure

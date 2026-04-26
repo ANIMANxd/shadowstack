@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import './GroupedBarChart.css'
 
 /**
- * GroupedBarChart ΓÇô D3.js paired bar chart for Predicted vs Actuals.
+ * GroupedBarChart – D3.js paired bar chart for Predicted vs Actuals.
  *
  * Props:
  *  - data       : Array<{ label: string, actual: number, predicted: number }>
@@ -20,7 +20,7 @@ export default function GroupedBarChart({
 
     const margin = { top: 20, right: 20, bottom: 40, left: 50 }
 
-    // ΓöÇΓöÇ Resize observer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Resize observer ──────────────────────────────────────────────────────
     useEffect(() => {
         if (!containerRef.current) return
         const observer = new ResizeObserver(([entry]) => {
@@ -31,7 +31,7 @@ export default function GroupedBarChart({
         return () => observer.disconnect()
     }, [])
 
-    // ΓöÇΓöÇ D3 render ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── D3 render ────────────────────────────────────────────────────────────
     useEffect(() => {
         const { width, height } = dims
         if (!svgRef.current || width === 0 || height === 0 || data.length === 0) return

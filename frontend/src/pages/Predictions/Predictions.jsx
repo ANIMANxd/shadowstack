@@ -1,10 +1,7 @@
 import './Predictions.css'
 
 /**
- * Predictions ΓÇô ML-powered PR cost prediction page.
- *
- * Shows upcoming and recent pull requests with predicted
- * infrastructure cost impact before merge.
+ * Predictions – ML-powered PR cost prediction page.
  */
 
 import useDashboardData from '../../hooks/useDashboardData'
@@ -45,7 +42,6 @@ export default function Predictions() {
         </p>
       </header>
 
-      {/* PR predictions table */}
       <div className="widget">
         <div className="widget__header">
           <div className="widget__title-group">
@@ -70,7 +66,7 @@ export default function Predictions() {
               {prs.length === 0 ? (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', color: 'var(--clr-text-muted)', padding: 'var(--space-6)' }}>
-                    No predictions available. Connect a repository to get started.
+                    No predictions available. Connect a repository and run a prediction to get started.
                   </td>
                 </tr>
               ) : (
@@ -98,7 +94,6 @@ export default function Predictions() {
         </div>
       </div>
 
-      {/* Forecast chart placeholder */}
       <div className="widget" style={{ marginTop: 'var(--space-6)' }}>
         <div className="widget__header">
           <div className="widget__title-group">
@@ -107,7 +102,7 @@ export default function Predictions() {
           </div>
         </div>
         <div className="widget__chart-area">
-          <div className="placeholder-shimmer" data-label="ML forecast chart - connect a repo to generate predictions" />
+          <div className="placeholder-shimmer" data-label="🔮  ML forecast chart — connect a repo to generate predictions" />
         </div>
       </div>
     </section>

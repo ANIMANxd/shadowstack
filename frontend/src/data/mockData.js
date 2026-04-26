@@ -1,9 +1,9 @@
 /**
- * mockData.js ΓÇô Initial mock data for all dashboard widgets.
+ * mockData.js – Initial mock data for all dashboard widgets.
  * Replace with real API calls later.
  */
 
-// ΓöÇΓöÇ KPI Cards ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── KPI Cards ────────────────────────────────────────────────────────────────
 export const KPI_DATA = [
     {
         id: 'total-spend',
@@ -40,14 +40,14 @@ export const KPI_DATA = [
         label: 'Efficiency Score',
         value: '74.3',
         delta: '+3.1',
-        direction: 'down',  // higher is good ΓåÆ green
+        direction: 'down',  // higher is good → green
         period: 'pts this month',
         iconBg: 'rgba(236,201,75,0.12)',
         iconColor: '#ecc94b',
     },
 ]
 
-// ΓöÇΓöÇ Cost Trend (30 days) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Cost Trend (30 days) ──────────────────────────────────────────────────────
 function generateDailySpend(days = 30, baseValue = 1400, variance = 300) {
     const data = []
     const now = new Date()
@@ -63,7 +63,7 @@ function generateDailySpend(days = 30, baseValue = 1400, variance = 300) {
 
 export const COST_TREND_DATA = generateDailySpend(30, 1420, 320)
 
-// Predicted overlay (days 25ΓÇô45)
+// Predicted overlay (days 25–45)
 export const COST_FORECAST_DATA = (() => {
     const lastReal = COST_TREND_DATA[COST_TREND_DATA.length - 1]
     const forecast = []
@@ -76,7 +76,7 @@ export const COST_FORECAST_DATA = (() => {
     return forecast
 })()
 
-// ΓöÇΓöÇ Service Breakdown ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Service Breakdown ─────────────────────────────────────────────────────────
 export const SERVICE_SPEND = [
     { name: 'EC2 Compute', cost: 18420, pct: 38, color: '#63b3ed' },
     { name: 'RDS Database', cost: 9810, pct: 20, color: '#9f7aea' },
@@ -86,18 +86,18 @@ export const SERVICE_SPEND = [
     { name: 'Other', cost: 6411, pct: 13, color: '#4a5568' },
 ]
 
-// ΓöÇΓöÇ Anomaly Alerts ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Anomaly Alerts ────────────────────────────────────────────────────────────
 export const RECENT_ALERTS = [
     { id: 1, severity: 'high', message: 'EC2 spend 34% above 7-day avg', time: '2m ago' },
     { id: 2, severity: 'medium', message: 'Untagged resources: 17 detected', time: '18m ago' },
     { id: 3, severity: 'low', message: 'S3 storage growth +8% this week', time: '1h ago' },
 ]
 
-// ΓöÇΓöÇ Top Resources by Cost ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Top Resources by Cost ─────────────────────────────────────────────────────
 export const TOP_RESOURCES = [
     { id: 'r1', name: 'prod-api-cluster', type: 'EKS', cost: '$8,240', pct: 85, color: '#63b3ed' },
     { id: 'r2', name: 'analytics-db-master', type: 'RDS', cost: '$5,120', pct: 53, color: '#9f7aea' },
     { id: 'r3', name: 'ml-training-gpu-fleet', type: 'EC2', cost: '$4,870', pct: 50, color: '#fc8181' },
     { id: 'r4', name: 'cdn-assets-bucket', type: 'CF', cost: '$3,410', pct: 35, color: '#48bb78' },
-    { id: 'r5', name: 'worker-queue-lambda', type: '╬╗', cost: '$1,890', pct: 19, color: '#ecc94b' },
+    { id: 'r5', name: 'worker-queue-lambda', type: 'λ', cost: '$1,890', pct: 19, color: '#ecc94b' },
 ]

@@ -1,24 +1,24 @@
 /**
- * apiClient.js ΓÇô Centralized Axios service layer for ShadowStack.
+ * apiClient.js – Centralized Axios service layer for ShadowStack.
  *
- * ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
- * Γöé  PBI-033: API Integration Layer                         Γöé
- * Γöé  ΓÇó Single Axios instance with env-based configuration   Γöé
- * Γöé  ΓÇó Request/response interceptors for auth & error flow  Γöé
- * Γöé  ΓÇó Automatic retry on network failures                  Γöé
- * ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+ * ┌─────────────────────────────────────────────────────────┐
+ * │  PBI-033: API Integration Layer                         │
+ * │  • Single Axios instance with env-based configuration   │
+ * │  • Request/response interceptors for auth & error flow  │
+ * │  • Automatic retry on network failures                  │
+ * └─────────────────────────────────────────────────────────┘
  */
 
 import axios from 'axios'
 
-// ΓöÇΓöÇ Configuration ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Configuration ─────────────────────────────────────────────────────────────
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 const REQUEST_TIMEOUT_MS = 15_000
 const MAX_RETRIES = 2
 const RETRY_DELAY_MS = 1_000
 
-// ΓöÇΓöÇ Custom error class ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Custom error class ────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
   constructor(message, status, code, endpoint) {
@@ -33,27 +33,27 @@ export class ApiError extends Error {
   /** User-friendly message by HTTP status */
   get userMessage() {
     const messages = {
-      400: 'Invalid request ΓÇö please check your input.',
-      401: 'Session expired ΓÇö please log in again.',
+      400: 'Invalid request — please check your input.',
+      401: 'Session expired — please log in again.',
       403: "You don't have permission to access this resource.",
       404: 'The requested data was not found.',
-      408: 'Request timed out ΓÇö please try again.',
-      429: 'Too many requests ΓÇö please slow down.',
-      500: 'Server error ΓÇö our team has been notified.',
-      502: 'Bad gateway ΓÇö the server is temporarily unreachable.',
-      503: 'Service temporarily unavailable ΓÇö please try again shortly.',
+      408: 'Request timed out — please try again.',
+      429: 'Too many requests — please slow down.',
+      500: 'Server error — our team has been notified.',
+      502: 'Bad gateway — the server is temporarily unreachable.',
+      503: 'Service temporarily unavailable — please try again shortly.',
     }
     return messages[this.status] || `Unexpected error (${this.status}).`
   }
 }
 
-// ΓöÇΓöÇ Utility ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Utility ───────────────────────────────────────────────────────────────────
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// ΓöÇΓöÇ Create the Axios instance ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Create the Axios instance ─────────────────────────────────────────────────
 
 function createApiClient() {
   const client = axios.create({
@@ -65,7 +65,7 @@ function createApiClient() {
     },
   })
 
-  // ΓöÇΓöÇ Request interceptor ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Request interceptor ───────────────────────────────────────────────────
   client.interceptors.request.use(
     (config) => {
       // Inject auth token if present
@@ -81,7 +81,7 @@ function createApiClient() {
 
       if (import.meta.env.DEV) {
         console.debug(
-          `%c[API] ΓåÆ ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+          `%c[API] → ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
           'color: #63b3ed; font-weight: bold',
         )
       }
@@ -91,12 +91,12 @@ function createApiClient() {
     (error) => Promise.reject(error),
   )
 
-  // ΓöÇΓöÇ Response interceptor ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Response interceptor ──────────────────────────────────────────────────
   client.interceptors.response.use(
     (response) => {
       if (import.meta.env.DEV) {
         console.debug(
-          `%c[API] ΓåÉ ${response.status} ${response.config.url}`,
+          `%c[API] ← ${response.status} ${response.config.url}`,
           'color: #48bb78; font-weight: bold',
         )
       }
@@ -106,7 +106,7 @@ function createApiClient() {
       const config = error.config
       const status = error.response?.status || 0
 
-      // ΓöÇΓöÇ Retry logic for 5xx and network errors ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ── Retry logic for 5xx and network errors ──────────────────────────
       if (
         config &&
         (status >= 500 || !error.response) &&
@@ -124,19 +124,19 @@ function createApiClient() {
         return client(config)
       }
 
-      // ΓöÇΓöÇ Handle specific status codes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ── Handle specific status codes ────────────────────────────────────
       const endpoint = config?.url || 'unknown'
 
       if (status === 401) {
         localStorage.removeItem('shadowstack_token')
-        console.error('[API] Authentication expired ΓÇö cleared token.')
+        console.error('[API] Authentication expired — cleared token.')
       }
 
       if (status === 429) {
-        console.warn('[API] Rate limited ΓÇö backing off.')
+        console.warn('[API] Rate limited — backing off.')
       }
 
-      // ΓöÇΓöÇ Build structured error ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ── Build structured error ──────────────────────────────────────────
       const serverMessage =
         error.response?.data?.message ||
         error.message ||
@@ -165,7 +165,7 @@ function createApiClient() {
   return client
 }
 
-// ΓöÇΓöÇ Singleton instance ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Singleton instance ────────────────────────────────────────────────────────
 
 const apiClient = createApiClient()
 

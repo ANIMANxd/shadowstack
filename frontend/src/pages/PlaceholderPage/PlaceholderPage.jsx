@@ -1,13 +1,13 @@
 import './PlaceholderPage.css'
 
 /**
- * PlaceholderPage ΓÇô fallback view for routes not yet implemented.
+ * PlaceholderPage – fallback view for routes not yet implemented.
  * Props:
  *  - title       : string
  *  - icon        : string  (emoji)
  *  - description : string
  */
-export default function PlaceholderPage({ title, icon = '≡ƒÜº', description }) {
+export default function PlaceholderPage({ title, icon = '🚧', description }) {
     return (
         <section className="placeholder-page" aria-labelledby="placeholder-title">
             <header className="page-header">

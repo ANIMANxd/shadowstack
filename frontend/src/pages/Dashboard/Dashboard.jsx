@@ -3,21 +3,21 @@ import D3Chart from '../../components/D3Chart/D3Chart'
 import useDashboardData from '../../hooks/useDashboardData'
 import './Dashboard.css'
 
-// ΓöÇΓöÇ KPI Icons ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── KPI Icons ─────────────────────────────────────────────────────────────────
 const icons = {
-    'total-spend': '≡ƒÆ╕',
-    'predicted-30d': '≡ƒö«',
-    'savings': 'Γ£à',
-    'efficiency-score': 'ΓÜí',
+    'total-spend': '💸',
+    'predicted-30d': '🔮',
+    'savings': '✅',
+    'efficiency-score': '⚡',
 }
 
-const ArrowUp = () => <span aria-hidden="true">Γû▓</span>
-const ArrowDown = () => <span aria-hidden="true">Γû╝</span>
+const ArrowUp = () => <span aria-hidden="true">▲</span>
+const ArrowDown = () => <span aria-hidden="true">▼</span>
 
-// Severity ΓåÆ badge class
+// Severity → badge class
 const severityClass = { high: 'badge--red', medium: 'badge--amber', low: 'badge--blue' }
 
-// ΓöÇΓöÇ Sub-components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Sub-components ─────────────────────────────────────────────────────────────
 function KpiCard({ id, label, value, delta, direction, period, iconBg, iconColor }) {
     return (
         <article className="kpi-card" aria-label={label}>
@@ -57,7 +57,7 @@ function AlertItem({ severity, message, time }) {
     )
 }
 
-// ΓöÇΓöÇ Main Dashboard Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Main Dashboard Page ────────────────────────────────────────────────────────
 export default function Dashboard() {
     const [activeRange, setActiveRange] = useState('30D')
     const ranges = ['7D', '30D', '90D']
@@ -100,14 +100,14 @@ export default function Dashboard() {
                 </p>
             </header>
 
-            {/* ΓöÇΓöÇ KPI Strip ΓöÇΓöÇ */}
+            {/* ── KPI Strip ── */}
             <div className="dashboard__kpi-grid" role="list" aria-label="Key performance indicators">
                 {kpiData.map(kpi => (
                     <KpiCard key={kpi.id} {...kpi} />
                 ))}
             </div>
 
-            {/* ΓöÇΓöÇ Charts Row ΓöÇΓöÇ */}
+            {/* ── Charts Row ── */}
             <div className="dashboard__charts-row">
 
                 {/* Main spend trend chart */}
@@ -165,7 +165,7 @@ export default function Dashboard() {
 
             </div>
 
-            {/* ΓöÇΓöÇ Bottom Row ΓöÇΓöÇ */}
+            {/* ── Bottom Row ── */}
             <div className="dashboard__bottom-row">
 
                 {/* Forecast placeholder */}
@@ -178,7 +178,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="widget__chart-area">
-                        <div className="placeholder-shimmer" data-label="≡ƒôê  Predictive chart coming soon" />
+                        <div className="placeholder-shimmer" data-label="📈  Predictive chart coming soon" />
                     </div>
                 </div>
 

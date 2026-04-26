@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 /**
- * ProtectedRoute ΓÇô auth gate for dashboard routes.
+ * ProtectedRoute – auth gate for dashboard routes.
  *
  * If the user is not authenticated (no token in AuthContext),
  * they are redirected to /login with the attempted path preserved

@@ -2,7 +2,7 @@ import useDashboardData from '../../hooks/useDashboardData'
 import './CostAnalysis.css'
 
 /**
- * CostAnalysis ΓÇô PR-driven cost analysis page.
+ * CostAnalysis – PR-driven cost analysis page.
  *
  * Displays historical cost data broken down by service,
  * with drill-down by repository and time range.
@@ -41,29 +41,29 @@ export default function CostAnalysis() {
         <div className="cost-analysis__card">
           <div className="cost-analysis__card-header">
             <span className="cost-analysis__card-label">Total This Month</span>
-            <span className="cost-analysis__card-icon" aria-hidden="true">≡ƒÆ░</span>
+            <span className="cost-analysis__card-icon" aria-hidden="true">💰</span>
           </div>
           <div className="cost-analysis__card-value">$4,280</div>
           <div className="cost-analysis__card-delta cost-analysis__card-delta--down">
-            Γû╝ 12% vs last month
+            ▼ 12% vs last month
           </div>
         </div>
 
         <div className="cost-analysis__card">
           <div className="cost-analysis__card-header">
             <span className="cost-analysis__card-label">Avg per PR</span>
-            <span className="cost-analysis__card-icon" aria-hidden="true">≡ƒôè</span>
+            <span className="cost-analysis__card-icon" aria-hidden="true">📊</span>
           </div>
           <div className="cost-analysis__card-value">$18.40</div>
           <div className="cost-analysis__card-delta cost-analysis__card-delta--up">
-            Γû▓ 3% vs last month
+            ▲ 3% vs last month
           </div>
         </div>
 
         <div className="cost-analysis__card">
           <div className="cost-analysis__card-header">
             <span className="cost-analysis__card-label">Top Service</span>
-            <span className="cost-analysis__card-icon" aria-hidden="true">Γÿü∩╕Å</span>
+            <span className="cost-analysis__card-icon" aria-hidden="true">☁️</span>
           </div>
           <div className="cost-analysis__card-value">Lambda</div>
           <div className="cost-analysis__card-delta">$1,420 this period</div>
@@ -79,7 +79,7 @@ export default function CostAnalysis() {
           </div>
         </div>
         <div className="widget__chart-area">
-          <div className="placeholder-shimmer" data-label="≡ƒôê  Interactive cost chart ΓÇö connect a repo to populate" />
+          <div className="placeholder-shimmer" data-label="📈  Interactive cost chart — connect a repo to populate" />
         </div>
       </div>
     </section>
