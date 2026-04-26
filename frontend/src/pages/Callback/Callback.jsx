@@ -75,11 +75,11 @@ export default function Callback() {
         }, 400)
       } catch (err) {
         // ΓöÇΓöÇ Dev-mode fallback ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-        // If the backend isn't running yet, simulate a successful exchange
+        // If the backend isn't running or OAuth isn't configured, simulate a successful exchange
         // so the frontend auth flow can be tested independently.
-        if (DEV_MODE && isNetworkError(err)) {
+        if (DEV_MODE && (isNetworkError(err) || err?.status === 500)) {
           console.warn(
-            '[Callback] Backend unreachable ΓÇö using dev-mode mock token.',
+            '[Callback] Backend OAuth not configured — using dev-mode mock token.',
           )
 
           const mockToken = `dev_mock_token_${Date.now()}`
