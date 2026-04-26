@@ -4,9 +4,8 @@ import { MemoryRouter } from 'react-router-dom'
 import CostAnalysis from '../CostAnalysis'
 import React from 'react'
 
-// Mock the hook so we don't really do API calls, we just provide deterministic data for the render test
-vi.mock('../../../hooks/useDashboardData', () => ({
-    useDashboardData: vi.fn(() => ({
+vi.mock('../../../hooks/useDashboardData', () => {
+    const hookData = {
         data: {
             kpis: {
                 kpis: [],
@@ -35,8 +34,13 @@ vi.mock('../../../hooks/useDashboardData', () => ({
         pause: vi.fn(),
         resume: vi.fn(),
         clearError: vi.fn()
-    }))
-}))
+    }
+    const mockHook = vi.fn(() => hookData)
+    return {
+        useDashboardData: mockHook,
+        default: mockHook
+    }
+})
 
 describe('CostAnalysis Page', () => {
     it('renders the core widgets and ensures D3 components do not crash', () => {
@@ -46,12 +50,11 @@ describe('CostAnalysis Page', () => {
             </MemoryRouter>
         )
 
-        // Title should be present (actual h1 text is "Trend Insights")
-        expect(screen.getByText(/Trend Insights/i)).toBeInTheDocument()
+        // Title should be present
+        expect(screen.getByText(/Cost Analysis/i)).toBeInTheDocument()
         
-        // Ensure the charts wrapper renders (verifying no D3 crash during mount)
-        // Since we mocked ResizeObserver in setupTests, D3 won't blow up.
-        expect(screen.getByText(/Actual vs Predicted Series/i)).toBeInTheDocument()
-        expect(screen.getByText(/Service Cost Distribution/i)).toBeInTheDocument()
+        // Ensure the charts wrapper renders
+        expect(screen.getByText(/Total This Month/i)).toBeInTheDocument()
+        expect(screen.getByText(/Cost Over Time/i)).toBeInTheDocument()
     })
 })

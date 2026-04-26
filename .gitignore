@@ -11,6 +11,9 @@ dist/
 build/
 .npm
 
+# Test Coverage
+coverage/
+
 # OS generated files
 .DS_Store
 Thumbs.db
