@@ -1,50 +1,79 @@
 # ShadowStack Codebase Overview
 
-This document provides a comprehensive mapping of the directories and files within the ShadowStack repository. It serves as a quick reference guide to understand "what lives where" in the project.
+This document provides a comprehensive mapping of the directories and files within the ShadowStack repository.
 
-## 📂 Root Directory
-- **`CONTEXT.md`**: The master architectural document. Contains the project vision, technical stack, database schema definitions, performance benchmarks, and the sprint-wise development plan.
-- **`CODEBASE.md`**: This file. A directory and file map of the entire project.
-- **`modifications.md`**: A changelog detailing recent integrations, particularly the Sprint 3 backend modifications (GitHub OAuth, Webhooks, DB schema updates) and an implementation checklist for the team.
-- **`docker-compose.yml`**: Infrastructure orchestration file. Used to spin up the local project environment (e.g., PostgreSQL/TimescaleDB, Redis, Kafka, and the FastAPI backend server).
-- **`backend_health_check.py`**: A utility script to verify if the backend API and database connections are live and functioning correctly.
-- **`README.md`**: The primary entry point for the repository. Usually contains setup instructions and quick-start commands.
+## Root Directory
 
-## 📂 `backend/` (FastAPI Server)
-*The core API serving ML predictions, handling database operations, and communicating with GitHub.*
+- **`CONTEXT.md`**: Master architectural document with project vision, technical stack, database schema, performance benchmarks, and sprint-wise development plan.
+- **`WHAT_IT_DOES.md`**: Detailed explanation of the core workflow and system behaviour.
+- **`CODEBASE.md`**: This file — directory and file map.
+- **`README.md`**: Setup instructions, quick-start commands, and project overview.
+- **`docker-compose.yml`**: Full local orchestration (PostgreSQL, FastAPI backend, React frontend).
+- **`backend_health_check.py`**: Utility script to verify backend API and database connections.
 
-- **`main.py`**: The central application file. It contains:
-  - Startup/shutdown lifecycles (loading ML models into memory, creating DB tables).
-  - Webhook endpoints (`POST /webhook/github`) for receiving GitHub PR events and validating HMAC signatures.
-  - ML inference endpoints (`POST /api/predict`, `POST /api/costs/forecast`).
-  - Frontend data endpoints (`GET /api/predictions`).
-  - Integration endpoints (`POST /api/integrations/github/webhook`) for securely storing GitHub OAuth tokens and automatically registering repository webhooks.
-  - Helper functions for talking to the GitHub API (`post_github_comment`).
-- **`requirements.txt`**: Python dependencies for the backend (FastAPI, SQLAlchemy, Scikit-Learn, PyTorch, Pandas, etc.).
-- **`Dockerfile`**: Instructions for containerizing the FastAPI backend.
-- **`.env`** *(Not checked into source control)*: Contains environment secrets like `DATABASE_URL`, `GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET`, and ML model paths.
+## `backend/` — FastAPI Server
 
-## 📂 `ml_pipeline/` (Machine Learning Engine)
-*Scripts and training data for the Random Forest cost predictor and LSTM load forecaster.*
+The core API serving ML predictions, handling database operations, and communicating with GitHub.
 
-- **`generate_data.py`**: A script built by the Data Engineering role to generate the 50,000+ row synthetic dataset. Correlates AST code complexity with simulated resource usage and costs.
-- **`inference.py`**: A standalone script to test model inferences without spinning up the FastAPI server. Useful for debugging model input/output shapes.
-- **`check_cuda.py`**: A utility script to verify if PyTorch can see the local GPU (CUDA) to speed up LSTM training.
-- **`data/`**: Directory containing the generated synthetic `.csv` files used for training.
-- **`models/`**: The artifact directory for trained models.
-  - `rf_cost_model_v1.joblib` / `rf_cost_model_v1_final.joblib`: The Random Forest pipeline artifacts.
-  - `lstm_final_forecaster.pth` (and other variants): The PyTorch serialized weights for the LSTM time-series forecaster.
-- **`notebooks/`**: Jupyter notebooks used for data exploration and iterative model training.
-  - `02_model_training.ipynb`: Exploratory data analysis and Random Forest training.
-  - `03_lstm_forecasting.ipynb`: Time-series data preparation and PyTorch LSTM training.
+- **`main.py`**: Central application file containing:
+  - Startup/shutdown lifecycles (ML model loading, DB table creation)
+  - Webhook endpoint (`POST /webhook/github`) with HMAC-SHA256 validation
+  - ML inference endpoints (`POST /api/predict`, `POST /api/costs/forecast`)
+  - AI analysis endpoint (`POST /api/analyze-pr`) combining AST + Gemini + ML
+  - GitHub PR fetching endpoints (`GET /api/github/prs`, `GET /api/github/prs/{n}/files`)
+  - Frontend data endpoints (`GET /api/predictions`, `GET /api/costs/history`, `GET /api/model-metrics`)
+  - Integration endpoints (`POST /api/integrations/github/webhook`) for OAuth token storage and webhook registration
+  - AST-driven background analysis for PR events
+- **`ast_analyzer.py`**: Python AST parser that extracts complexity metrics (functions, loops, branches, cyclomatic complexity) and generates rule-based optimisation recommendations.
+- **`gemini_analyzer.py`**: Google Gemini AI integration using `google-genai` SDK. Sends code + AST metrics to Gemini 2.5 Flash and returns intelligent, actionable cost optimisation suggestions with refactored code examples.
+- **`pricing_config.yaml`**: Mock cloud pricing tiers mapping resource types to hourly USD rates (compute, database, storage, network, cache).
+- **`requirements.txt`**: Python dependencies (FastAPI, SQLAlchemy, scikit-learn, PyTorch, Pandas, PyYAML, google-genai).
+- **`Dockerfile`**: Container build for the FastAPI backend.
+- **`.env`**: Environment secrets (DATABASE_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_WEBHOOK_SECRET, MODEL_PATH, LSTM_MODEL_PATH, GEMINI_API_KEY).
 
-## 📂 `frontend/` (Next.js Application)
-*The real-time dashboard UI for end-users, migrating from React to Next.js in Sprint 3.*
+## `frontend/` — React + Vite Dashboard
 
-- **`README.md`**: Placeholder/setup instructions for the frontend package.
-- *(Upcoming Files)*: Will contain the Auth.js/NextAuth configuration, Tailwind CSS components, the GitHub OAuth login flow, and D3.js visualizations hooked up to the backend `GET /api/predictions` endpoint.
+The real-time dashboard UI for end-users.
 
-## 📂 `docs/`
-*General project documentation and meeting notes.*
+- **`src/pages/`**:
+  - `Dashboard/Dashboard.jsx`: Main overview with KPIs, D3.js spend trend chart, service breakdown, alerts, top resources, 30-day forecast, and model metrics panel.
+  - `Predictions/Predictions.jsx`: PR prediction table with baseline/predicted/delta/risk columns, clickable rows showing recommendations, and LSTM forecast chart.
+  - `CostAnalysis/CostAnalysis.jsx`: Historical cost breakdown with real data-derived summary cards and interactive trend chart.
+  - `CodeAnalyzer/CodeAnalyzer.jsx`: **PR Analyzer** — fetches open PRs from connected GitHub repo, displays changed files with expandable diffs, runs on-demand AST + Gemini AI + ML cost analysis.
+  - `Alerts/Alerts.jsx`: Real-time anomaly alerts from prediction history (high complexity / high delta).
+  - `Reports/Reports.jsx`: Executive summary with risk distribution, service breakdown, and full prediction history table.
+  - `Settings/Settings.jsx`: Repository connection, deployment defaults, and account management.
+  - `Login/Login.jsx`: GitHub OAuth entry point with animated UI.
+  - `Callback/Callback.jsx`: OAuth redirect handler exchanging code for token.
+- **`src/components/`**:
+  - `D3Chart/D3Chart.jsx`: Reusable D3.js area chart with tooltips and responsive sizing.
+  - `Layout/Layout.jsx`: Root shell with sidebar, header, and route rendering.
+  - `Sidebar/Sidebar.jsx`: Collapsible navigation with inline SVG icons.
+  - `Header/Header.jsx`: Top bar with live status, notifications, and user dropdown.
+  - `ProtectedRoute/ProtectedRoute.jsx`: Auth gate for dashboard routes.
+- **`src/hooks/useDashboardData.js`**: Custom React hook polling `/api/predictions`, `/api/costs/history`, `/api/model-metrics`, and `/api/costs/forecast` every 30 seconds.
+- **`src/services/apiClient.js`**: Centralised Axios instance with interceptors, retry logic, and custom error handling.
+- **`src/context/AuthContext.jsx`**: Global auth state managing GitHub OAuth tokens and user profiles.
+- **`src/data/mockData.js`**: Fallback mock data used when backend is unreachable during development.
+- **`package.json`**: Dependencies (React 19, Vite, D3, Axios, React Router).
 
-- **`sprint1-notes.md`**: Developer notes and tasks tracking from the Sprint 1 phase.
+## `ml_pipeline/` — Machine Learning Engine
+
+Scripts, training data, and model artefacts.
+
+- **`generate_data.py`**: Generates the 50,000+ row synthetic dataset correlating AST code complexity with simulated resource usage and costs. Inserts directly into PostgreSQL.
+- **`inference.py`**: Standalone script to test model inferences without spinning up the FastAPI server.
+- **`check_cuda.py`**: Utility to verify PyTorch GPU (CUDA) availability.
+- **`models/`**: Trained model artefacts:
+  - `feature_pipeline2.pkl`: Random Forest pipeline (primary production model).
+  - `lstm_final_forecaster.pth`: PyTorch LSTM time-series forecaster weights.
+- **`notebooks/`**: Jupyter notebooks for exploratory training:
+  - `02_model_training.ipynb`: Random Forest training and evaluation.
+  - `03_lstm_forecasting.ipynb`: LSTM time-series model training.
+
+## `docs/`
+
+- **`schemadesign-shadowstack.pdf`**: Official database schema design document.
+- **`srs-document-shadowstack.pdf`**: Software Requirements Specification.
+- **`product-backlog.pdf`**: Sprint backlog and task tracking.
+- **`sprint1-notes.md`**: Sprint 1 developer notes.

@@ -6,9 +6,11 @@ import './Layout.css'
 
 // Page imports
 import Dashboard from '../../pages/Dashboard/Dashboard'
-import PlaceholderPage from '../../pages/PlaceholderPage/PlaceholderPage'
 import CostAnalysis from '../../pages/CostAnalysis/CostAnalysis'
 import Predictions from '../../pages/Predictions/Predictions'
+import CodeAnalyzer from '../../pages/CodeAnalyzer/CodeAnalyzer'
+import Alerts from '../../pages/Alerts/Alerts'
+import Reports from '../../pages/Reports/Reports'
 import Settings from '../../pages/Settings/Settings'
 
 /**
@@ -61,10 +63,10 @@ export default function Layout() {
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/costs" element={<CostAnalysis />} />
                             <Route path="/predict" element={<Predictions />} />
+                            <Route path="/analyze" element={<CodeAnalyzer />} />
+                            <Route path="/alerts" element={<Alerts />} />
+                            <Route path="/reports" element={<Reports />} />
                             <Route path="/settings" element={<Settings />} />
-                            <Route path="/resources" element={<PlaceholderPage title="Resources" icon="🗄️" description="Live inventory of all cloud resources with tagging and grouping." />} />
-                            <Route path="/alerts" element={<PlaceholderPage title="Alerts" icon="🔔" description="Budget threshold alerts and anomaly detection notifications." />} />
-                            <Route path="/reports" element={<PlaceholderPage title="Reports" icon="📋" description="Scheduled cost reports and executive summary exports." />} />
                         </Routes>
                     </div>
                 </main>

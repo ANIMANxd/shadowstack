@@ -57,6 +57,20 @@ function AlertItem({ severity, message, time }) {
     )
 }
 
+function MetricRow({ label, value }) {
+    return (
+        <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            padding: 'var(--space-2) 0',
+            borderBottom: '1px solid var(--clr-border)',
+            fontSize: 'var(--fs-sm)',
+        }}>
+            <span style={{ color: 'var(--clr-text-muted)' }}>{label}</span>
+            <span style={{ fontWeight: 600, color: 'var(--clr-text-primary)' }}>{value}</span>
+        </div>
+    )
+}
+
 // ── Main Dashboard Page ────────────────────────────────────────────────────────
 export default function Dashboard() {
     const [activeRange, setActiveRange] = useState('30D')
@@ -84,10 +98,23 @@ export default function Dashboard() {
     const rangeMap = { '7D': 7, '30D': 30, '90D': 30 }
     const visibleData = data?.historicalCosts ? data.historicalCosts.slice(-rangeMap[activeRange]) : []
 
+    // Build forecast overlay data if available
+    const forecastData = []
+    if (data?.forecast?.length && data?.historicalCosts?.length) {
+        const lastHist = data.historicalCosts[data.historicalCosts.length - 1]
+        const lastDate = new Date(lastHist.date)
+        data.forecast.forEach((day) => {
+            const d = new Date(lastDate)
+            d.setDate(d.getDate() + day.day)
+            forecastData.push({ date: d, value: day.predicted_cost_usd })
+        })
+    }
+
     const kpiData = data?.kpis || []
     const serviceSpend = data?.serviceBreakdown || []
     const recentAlerts = data?.alerts || []
     const topResources = data?.topResources || []
+    const modelMetrics = data?.modelMetrics
 
     return (
         <section aria-labelledby="dashboard-title">
@@ -168,17 +195,52 @@ export default function Dashboard() {
             {/* ── Bottom Row ── */}
             <div className="dashboard__bottom-row">
 
-                {/* Forecast placeholder */}
+                {/* 30-Day Forecast chart */}
                 <div className="widget">
                     <div className="widget__header">
                         <div className="widget__title-group">
                             <p className="widget__label">ML Forecast</p>
                             <h2 className="widget__title">30-Day Prediction</h2>
-                            <p className="widget__subtitle">Upcoming connect</p>
+                            <p className="widget__subtitle">LSTM-powered cost projection</p>
                         </div>
                     </div>
                     <div className="widget__chart-area">
-                        <div className="placeholder-shimmer" data-label="📈  Predictive chart coming soon" />
+                        {forecastData.length > 0 ? (
+                            <D3Chart
+                                data={forecastData}
+                                color="#9f7aea"
+                                label="Forecast USD"
+                                formatValue={v => `$${v.toLocaleString()}`}
+                            />
+                        ) : (
+                            <div className="placeholder-shimmer" data-label="📈  Run a prediction to generate 30-day LSTM forecast" />
+                        )}
+                    </div>
+                </div>
+
+                {/* Model Performance Metrics */}
+                <div className="widget">
+                    <div className="widget__header">
+                        <div className="widget__title-group">
+                            <p className="widget__label">ML Performance</p>
+                            <h2 className="widget__title">Model Metrics</h2>
+                        </div>
+                    </div>
+                    <div style={{ padding: 'var(--space-4)' }}>
+                        {modelMetrics ? (
+                            <>
+                                <MetricRow label="Model Version" value={modelMetrics.model_version} />
+                                <MetricRow label="Model Type" value={modelMetrics.model_type} />
+                                <MetricRow label="MAE" value={modelMetrics.mae != null ? `$${modelMetrics.mae.toFixed(2)}` : 'N/A'} />
+                                <MetricRow label="RMSE" value={modelMetrics.rmse != null ? `$${modelMetrics.rmse.toFixed(2)}` : 'N/A'} />
+                                <MetricRow label="R² Score" value={modelMetrics.r2 != null ? modelMetrics.r2.toFixed(3) : 'N/A'} />
+                                <MetricRow label="Dataset Size" value={modelMetrics.dataset_size != null ? `${modelMetrics.dataset_size.toLocaleString()} rows` : 'N/A'} />
+                            </>
+                        ) : (
+                            <p style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--fs-sm)' }}>
+                                No model metrics available. Train a model to populate this panel.
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -189,7 +251,7 @@ export default function Dashboard() {
                             <p className="widget__label">Anomaly Detection</p>
                             <h2 className="widget__title">Recent Alerts</h2>
                         </div>
-                        <span className="badge badge--red" aria-label="3 active alerts">3</span>
+                        <span className="badge badge--red" aria-label={`${recentAlerts.length} active alerts`}>{recentAlerts.length}</span>
                     </div>
                     <ul aria-label="Alert list">
                         {recentAlerts.map(a => <AlertItem key={a.id} {...a} />)}

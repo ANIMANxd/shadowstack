@@ -9,4 +9,5 @@ numpy
 python-dotenv
 torch
 httpx
-dotenv
+pyyaml
+google-genai

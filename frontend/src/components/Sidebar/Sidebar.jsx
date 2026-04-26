@@ -28,12 +28,11 @@ const PredictIcon = () => (
     </svg>
 )
 
-const ResourcesIcon = () => (
+const CodeIcon = () => (
     <svg className="sidebar__icon" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3" />
-        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
     </svg>
 )
 
@@ -74,11 +73,11 @@ const PRIMARY_NAV = [
     { to: '/', label: 'Overview', Icon: DashboardIcon },
     { to: '/costs', label: 'Cost Analysis', Icon: CostIcon },
     { to: '/predict', label: 'Predictions', Icon: PredictIcon },
-    { to: '/resources', label: 'Resources', Icon: ResourcesIcon },
+    { to: '/analyze', label: 'Code Analyzer', Icon: CodeIcon },
 ]
 
 const SECONDARY_NAV = [
-    { to: '/alerts', label: 'Alerts', Icon: AlertsIcon, count: 3 },
+    { to: '/alerts', label: 'Alerts', Icon: AlertsIcon },
     { to: '/reports', label: 'Reports', Icon: ReportsIcon },
 ]
 
@@ -125,7 +124,7 @@ export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
 
                 {/* Secondary navigation */}
                 <span className="sidebar__section-label">Monitor</span>
-                {SECONDARY_NAV.map(({ to, label, Icon, count }) => ( // eslint-disable-line no-unused-vars
+                {SECONDARY_NAV.map(({ to, label, Icon }) => ( // eslint-disable-line no-unused-vars
                     <NavLink
                         key={to}
                         to={to}
@@ -136,11 +135,6 @@ export default function Sidebar({ isCollapsed, onToggle, mobileOpen }) {
                     >
                         <Icon />
                         <span className="sidebar__link-text">{label}</span>
-                        {count && (
-                            <span className="sidebar__count" aria-label={`${count} unread`}>
-                                {count}
-                            </span>
-                        )}
                     </NavLink>
                 ))}
 

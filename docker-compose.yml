@@ -11,6 +11,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -20,18 +25,30 @@ services:
       DATABASE_URL: postgresql://postgres:password@db:5432/shadowstack_db
       MODEL_PATH: /models/feature_pipeline2.pkl
       LSTM_MODEL_PATH: /models/lstm_final_forecaster.pth
+      GITHUB_WEBHOOK_SECRET: shadowstack_webhook_secret_2026
+      APP_DOMAIN: http://localhost:8000
     volumes:
       - ./ml_pipeline/models:/models:ro
+      - ./backend/pricing_config.yaml:/app/pricing_config.yaml:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
-    # Placeholder for Sanay to satisfy PBI-004
     image: node:18-alpine
     working_dir: /app
     ports:
       - "3000:3000"
-    command: sh -c "echo 'Frontend container ready' && tail -f /dev/null"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npx vite --host 0.0.0.0 --port 3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_POLLING_INTERVAL_MS=30000
+      - VITE_GITHUB_CLIENT_ID=Ov23liCDviIEhUMqdNIc
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

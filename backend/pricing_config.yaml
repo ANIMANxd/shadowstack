@@ -1,0 +1,54 @@
+# ShadowStack Mock Cloud Pricing Configuration
+# Maps resource types to hourly rates (USD) for cost estimation.
+# These are realistic AWS-like approximations — no live API calls.
+
+compute:
+  t3.micro:        0.0104
+  t3.small:        0.0208
+  t3.medium:       0.0416
+  t3.large:        0.0832
+  t3.xlarge:       0.1664
+  m5.large:        0.096
+  m5.xlarge:       0.192
+  m5.4xlarge:      0.768
+  c5.large:        0.085
+  c5.xlarge:       0.170
+  r5.large:        0.126
+  g4dn.xlarge:     0.526
+  p3.2xlarge:      3.06
+
+database:
+  RDS-postgres:    0.115
+  RDS-mysql:       0.068
+  RDS-mariadb:     0.068
+  Aurora-serverless: 0.12
+  DynamoDB-wcu:    0.00065
+  DocumentDB:      0.277
+
+storage:
+  S3-standard:     0.023
+  S3-ia:           0.0125
+  S3-glacier:      0.00099
+  EBS-gp3:         0.08
+  EBS-io2-provisioned: 0.125
+  EFS-standard:    0.30
+
+network:
+  egress-internet: 0.09
+  egress-regional: 0.01
+  nat-gateway-hour: 0.045
+  transit-gateway-hour: 0.05
+  elastic-ip-idle: 0.005
+
+cache:
+  ElastiCache-redis: 0.034
+  ElastiCache-memcached: 0.025
+  MemoryDB:        0.06
+
+# Service-level base multipliers applied on top of unit price
+service_multipliers:
+  compute:  1.0
+  database: 1.4
+  storage:  0.6
+  network:  0.8
+  cache:    0.9

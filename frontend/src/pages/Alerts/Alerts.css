@@ -1,0 +1,116 @@
+.alerts-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+}
+
+.alerts__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.alerts__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--clr-bg-elevated);
+  border: 1px solid var(--clr-border);
+  text-align: center;
+}
+
+.alerts__stat-value {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  line-height: 1.1;
+  margin-bottom: var(--space-2);
+}
+
+.alerts__stat-label {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alerts__list {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alerts__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  color: var(--clr-text-muted);
+  font-size: var(--fs-sm);
+  gap: var(--space-3);
+}
+
+.alerts__item {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--clr-bg-elevated);
+  border: 1px solid var(--clr-border);
+  border-left: 3px solid var(--clr-border);
+}
+
+.alerts__item--high {
+  border-left-color: #fc8181;
+}
+
+.alerts__item--medium {
+  border-left-color: #ecc94b;
+}
+
+.alerts__item--low {
+  border-left-color: #63b3ed;
+}
+
+.alerts__item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.alerts__item-meta {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-muted);
+}
+
+.alerts__item-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.alerts__item-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--clr-text-secondary);
+}
+
+.alerts__item-metrics strong {
+  color: var(--clr-text-primary);
+}
+
+.alerts__item-rec {
+  font-size: var(--fs-sm);
+  color: var(--clr-text-secondary);
+  line-height: 1.6;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(99, 179, 237, 0.05);
+}

@@ -23,7 +23,9 @@ function getMockDashboardData() {
     serviceBreakdown: SERVICE_SPEND,
     alerts: RECENT_ALERTS,
     topResources: TOP_RESOURCES,
-    predictions: []
+    predictions: [],
+    modelMetrics: null,
+    forecast: [],
   }
 }
 
@@ -59,16 +61,33 @@ export function useDashboardData(options = {}) {
 
       try {
         const repo = localStorage.getItem('connected_repo')
-        
+
         // PBI-063: Query real backend data scoped to the connected repository
-        const [predictionsRes, costsRes] = await Promise.all([
+        const [predictionsRes, costsRes, metricsRes] = await Promise.all([
           apiClient.get('/api/predictions', { params: { repo: repo } }),
-          apiClient.get('/api/costs/history', { params: { repo: repo } })
+          apiClient.get('/api/costs/history', { params: { repo: repo } }),
+          apiClient.get('/api/model-metrics').catch(() => ({ data: null })),
         ])
 
         const dashboardData = {
           ...costsRes.data,
-          predictions: predictionsRes.data?.data || []
+          predictions: predictionsRes.data?.data || [],
+          modelMetrics: metricsRes.data || null,
+        }
+
+        // If we have 30 days of historical costs, fetch LSTM forecast
+        const hist = costsRes.data?.historicalCosts || []
+        if (hist.length >= 30) {
+          const last30 = hist.slice(-30).map(d => d.value)
+          try {
+            const forecastRes = await apiClient.post('/api/costs/forecast', {
+              daily_costs_usd: last30,
+            })
+            dashboardData.forecast = forecastRes.data?.forecast || []
+          } catch (forecastErr) {
+            console.warn('[useDashboardData] LSTM forecast failed:', forecastErr)
+            dashboardData.forecast = []
+          }
         }
 
         if (isMountedRef.current) {

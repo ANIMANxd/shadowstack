@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import apiClient from '../../services/apiClient'
 import './Settings.css'
@@ -43,11 +42,10 @@ const RESOURCES = {
 }
 
 /**
- * Settings – repository connection, deployment config, and manual prediction.
+ * Settings – repository connection, deployment config, and account management.
  */
 export default function Settings() {
   const { token, logout, user } = useAuth()
-  const navigate = useNavigate()
   const [repo, setRepo] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [toast, setToast] = useState(null)
@@ -58,9 +56,6 @@ export default function Settings() {
   // Deployment settings
   const [serviceName, setServiceName] = useState('compute')
   const [resourceType, setResourceType] = useState('t3.micro')
-  const [complexityScore, setComplexityScore] = useState(5.0)
-  const [resourceUnits, setResourceUnits] = useState(150)
-  const [prNumber, setPrNumber] = useState(1)
 
   const showToast = (type, message) => {
     setToast({ type, message })
@@ -99,29 +94,6 @@ export default function Settings() {
     }
   }
 
-  const handleRunPrediction = async () => {
-    setIsLoading(true)
-    try {
-      const payload = {
-        pr_number: Number(prNumber),
-        repository_full_name: connectedRepo || undefined,
-        complexity_score: Number(complexityScore),
-        resource_units: Number(resourceUnits),
-        service_name: serviceName,
-        resource_type: resourceType,
-      }
-      const response = await apiClient.post('/api/predict', payload)
-      const cost = response.data.predicted_cost_usd
-      showToast('success', `Predicted cost: $${cost}/month for PR #${prNumber}`)
-      setPrNumber((n) => Number(n) + 1)
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || 'Prediction failed.'
-      showToast('error', msg)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
     <section aria-labelledby="settings-title" className="settings-page">
       {toast && (
@@ -134,7 +106,7 @@ export default function Settings() {
         <p className="page-header__eyebrow">Configuration</p>
         <h1 className="page-header__title" id="settings-title">Settings</h1>
         <p className="page-header__subtitle">
-          Connect your GitHub repositories, configure deployment settings, and run predictions.
+          Connect your GitHub repositories and configure deployment preferences.
         </p>
       </header>
 
@@ -195,9 +167,9 @@ export default function Settings() {
               ⚙️
             </div>
             <div>
-              <h2 className="settings-card__title">Deployment Settings</h2>
+              <h2 className="settings-card__title">Deployment Defaults</h2>
               <p className="settings-card__desc">
-                Select the cloud service and resource type for cost predictions.
+                Default cloud service and resource type for predictions.
               </p>
             </div>
           </div>
@@ -231,72 +203,6 @@ export default function Settings() {
                 </select>
               </div>
             </div>
-
-            <div className="settings-form__row">
-              <div className="settings-form__field">
-                <label className="settings-form__label" htmlFor="complexity-input">Complexity Score</label>
-                <input
-                  id="complexity-input"
-                  className="settings-form__input"
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="0.1"
-                  value={complexityScore}
-                  onChange={(e) => setComplexityScore(e.target.value)}
-                />
-              </div>
-              <div className="settings-form__field">
-                <label className="settings-form__label" htmlFor="units-input">Resource Units</label>
-                <input
-                  id="units-input"
-                  className="settings-form__input"
-                  type="number"
-                  min="1"
-                  value={resourceUnits}
-                  onChange={(e) => setResourceUnits(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Manual Prediction Card ─────────────────────── */}
-        <div className="settings-card">
-          <div className="settings-card__header">
-            <div className="settings-card__icon settings-card__icon--predict" aria-hidden="true">
-              🔮
-            </div>
-            <div>
-              <h2 className="settings-card__title">Run Prediction</h2>
-              <p className="settings-card__desc">
-                Manually trigger a cost prediction for the connected repository.
-              </p>
-            </div>
-          </div>
-
-          <div className="settings-form">
-            <div className="settings-form__row">
-              <div className="settings-form__field">
-                <label className="settings-form__label" htmlFor="pr-input">PR Number</label>
-                <input
-                  id="pr-input"
-                  className="settings-form__input"
-                  type="number"
-                  min="1"
-                  value={prNumber}
-                  onChange={(e) => setPrNumber(e.target.value)}
-                />
-              </div>
-            </div>
-            <button
-              className="settings-form__submit"
-              onClick={handleRunPrediction}
-              disabled={isLoading}
-              style={{ marginTop: 'var(--space-3)' }}
-            >
-              {isLoading ? <span className="spinner-small" aria-label="Loading..." /> : 'Run Prediction'}
-            </button>
           </div>
         </div>
 

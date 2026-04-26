@@ -80,6 +80,7 @@ def generate_and_insert():
         region VARCHAR(50),
         complexity_score NUMERIC(5, 2),
         resource_units NUMERIC(12, 4),
+        repository_full_name TEXT,
         is_synthetic BOOLEAN NOT NULL DEFAULT TRUE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -87,36 +88,36 @@ def generate_and_insert():
     cursor.execute(ddl)
 
     # Tables designed for up to 10,000 records
-    num_records = 50000 
-    print(f"🧠 Generating {num_records} official rows...")
+    num_records = 50000
+    print(f"Generating {num_records} official rows...")
 
     start_date = datetime.now() - timedelta(days=365)
     complexity_scores = np.random.beta(a=2, b=5, size=num_records) * 9 + 1
-    
+
     data_tuples = []
-    
+
     for i in range(num_records):
         timestamp = start_date + timedelta(minutes=random.randint(0, 365*24*60))
         comp = float(round(complexity_scores[i], 2))
         svc = random.choices(SERVICES, weights=SERVICE_WEIGHTS, k=1)[0]
         res_type, unit_price = random.choice(PRICING[svc])
         region = random.choice(REGIONS)
-        
-        service_multiplier = 500.0 
+
+        service_multiplier = 500.0
         units = comp * service_multiplier * np.random.normal(1, 0.15)
-        units = max(0.1, units) 
-        
+        units = max(0.1, units)
+
         cost = (units * unit_price) + np.random.normal(0, 2)
-        cost = max(0.01, cost) 
-        
+        cost = max(0.01, cost)
+
         data_tuples.append((
-            timestamp, svc, round(cost, 4), res_type, region, comp, round(units, 4), True
+            timestamp, svc, round(cost, 4), res_type, region, comp, round(units, 4), None, True
         ))
 
-    print("💾 Inserting data into PostgreSQL...")
+    print("Inserting data into PostgreSQL...")
     insert_query = """
-        INSERT INTO usage_data 
-        (timestamp, service_name, cost_usd, resource_type, region, complexity_score, resource_units, is_synthetic)
+        INSERT INTO usage_data
+        (timestamp, service_name, cost_usd, resource_type, region, complexity_score, resource_units, repository_full_name, is_synthetic)
         VALUES %s
     """
     psycopg2.extras.execute_values(cursor, insert_query, data_tuples, page_size=2000)
