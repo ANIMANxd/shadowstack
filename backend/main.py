@@ -1092,7 +1092,7 @@ async def analyze_pr(payload: PRAnalyzeRequest, db: Session = Depends(get_db)):
             VALUES
                 (:pr_number, :repo, :complexity_score, :resource_units,
                  :service_name, :resource_type, :baseline_cost_usd, :predicted_cost_usd,
-                 :delta_usd, :recommendation, :model_version, 0)
+                 :delta_usd, :recommendation, :model_version, :is_comment_posted)
         """), {
             "pr_number": pr_number,
             "repo": repo,
@@ -1105,6 +1105,7 @@ async def analyze_pr(payload: PRAnalyzeRequest, db: Session = Depends(get_db)):
             "delta_usd": delta,
             "recommendation": gemini_suggestions or "\n".join(report.recommendations[:3]),
             "model_version": MODEL_VERSION,
+            "is_comment_posted": False,
         })
         db.commit()
     except Exception as e:
