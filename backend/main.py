@@ -59,6 +59,9 @@ def get_service_multiplier(service_name: str) -> float:
 ml_model = None
 MODEL_VERSION = "rf_v1"
 
+# ── Target Scaler (StandardScaler fitted on training cost_usd) ───────────────
+target_scaler = None
+
 # ── LSTM Forecaster ──────────────────────────────────────────────────────────
 LSTM_VERSION = "lstm_final_v1"
 lstm_model = None
@@ -186,30 +189,73 @@ def post_github_comment(repo_full_name: str, pr_number: int, comment_body: str, 
 
 # ── Cost & Recommendation Helpers ────────────────────────────────────────────
 
-def get_baseline_cost(repo_full_name: Optional[str], service_name: str, db: Session) -> float:
-    """Calculate baseline monthly cost from usage_data history for a repo + service."""
-    try:
-        query = """
-            SELECT AVG(cost_usd) as avg_daily
-            FROM usage_data
-            WHERE service_name = :service
-        """
-        params = {"service": service_name}
-        if repo_full_name:
-            query += " AND repository_full_name = :repo"
-            params["repo"] = repo_full_name
-        query += " AND timestamp >= NOW() - INTERVAL '30 days'"
+def _predict_cost(input_df: pd.DataFrame) -> float:
+    """
+    Runs the ML pipeline with full logging of feature vectors and applies
+    target StandardScaler inverse_transform to convert the regressor output
+    back to meaningful USD.
+    """
+    global ml_model, target_scaler
 
-        result = db.execute(text(query), params).fetchone()
-        avg_daily = result[0] if result and result[0] else 500.0
-        return round(float(avg_daily) * 30, 2)
+    if ml_model is None:
+        raise RuntimeError("ML model not loaded")
+
+    # 1. Log raw feature vector
+    raw_features = input_df.iloc[0].to_dict()
+    logger.info(f"[ML] Raw feature vector: {raw_features}")
+
+    # 2. Extract preprocessor and transform features
+    preprocessor = ml_model.named_steps['preprocessor']
+    X_scaled = preprocessor.transform(input_df)
+
+    # Log scaled numeric features (first 3 = complexity_score, resource_units, complexity_x_units)
+    dense = X_scaled.toarray() if hasattr(X_scaled, 'toarray') else np.array(X_scaled)
+    scaled_numeric = dense[0, :3].tolist()
+    logger.info(f"[ML] Scaled numeric features (complexity_score, resource_units, complexity_x_units): {scaled_numeric}")
+
+    # 3. Get raw prediction from regressor (scaled target space if training used target scaler)
+    regressor = ml_model.named_steps['regressor']
+    raw_pred = float(regressor.predict(X_scaled)[0])
+    logger.info(f"[ML] Raw model output (before inverse_transform): {raw_pred:.4f}")
+
+    # 4. Apply inverse_transform if target scaler is available
+    if target_scaler is not None:
+        final_cost = float(target_scaler.inverse_transform([[raw_pred]])[0][0])
+        logger.info(f"[ML] Final cost after inverse_transform: ${final_cost:.2f}")
+    else:
+        final_cost = raw_pred
+        logger.info(f"[ML] Final cost (no target scaler): ${final_cost:.2f}")
+
+    return round(final_cost, 2)
+
+
+def get_baseline_cost(repo_full_name: Optional[str], current_predicted_cost: float, db: Session) -> float:
+    """
+    Determine baseline cost for delta calculation.
+    Uses the most recent prediction for this repo from the predictions table.
+    If no previous prediction exists, uses the current prediction (delta = $0).
+    """
+    try:
+        if repo_full_name:
+            result = db.execute(text("""
+                SELECT predicted_cost_usd FROM predictions
+                WHERE repository_full_name = :repo
+                ORDER BY created_at DESC LIMIT 1
+            """), {"repo": repo_full_name}).fetchone()
+
+            if result and result[0] is not None:
+                baseline = round(float(result[0]), 2)
+                logger.info(f"[Baseline] Using previous prediction for {repo_full_name}: ${baseline}")
+                return baseline
     except Exception as e:
-        logger.warning(f"Baseline cost query failed: {e}, using default.")
+        logger.warning(f"[Baseline] Query failed: {e}")
         try:
             db.rollback()
         except Exception:
             pass
-        return 500.0 * 30  # default $15k/month baseline
+
+    logger.info(f"[Baseline] No previous prediction for {repo_full_name}; using current prediction as baseline.")
+    return round(current_predicted_cost, 2)
 
 
 def generate_pr_comment(
@@ -266,7 +312,7 @@ def generate_pr_comment(
 # ── Startup / Shutdown lifecycle ─────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global ml_model, lstm_model
+    global ml_model, lstm_model, target_scaler
 
     # Load the trained RF pipeline
     model_path = os.getenv("MODEL_PATH")
@@ -277,6 +323,21 @@ async def lifespan(app: FastAPI):
         logger.info(f"✅ RF model loaded from: {model_path}")
     except Exception as e:
         logger.error(f"❌ Could not load RF model from '{model_path}': {e}")
+
+    # Fit target StandardScaler on historical cost_usd for inverse_transform
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT cost_usd FROM usage_data WHERE cost_usd IS NOT NULL"))
+            costs = np.array([float(r[0]) for r in result.fetchall()]).reshape(-1, 1)
+            if len(costs) > 0:
+                from sklearn.preprocessing import StandardScaler
+                target_scaler = StandardScaler()
+                target_scaler.fit(costs)
+                logger.info(f"✅ Target scaler fitted on {len(costs)} cost records (mean={target_scaler.mean_[0]:.2f}, scale={target_scaler.scale_[0]:.2f})")
+            else:
+                logger.warning("⚠️  No cost data found for target scaler.")
+    except Exception as e:
+        logger.warning(f"⚠️  Could not fit target scaler: {e}")
 
     # Load the trained LSTM forecaster
     lstm_path = os.getenv("LSTM_MODEL_PATH")
@@ -678,11 +739,11 @@ async def predict_cost(payload: PredictRequest, db: Session = Depends(get_db)):
         "resource_type":      payload.resource_type,
     }])
 
-    predicted_cost = round(float(ml_model.predict(input_df)[0]), 2)
+    predicted_cost = _predict_cost(input_df)
     logger.info(f"🔮 PR #{payload.pr_number} prediction: ${predicted_cost:.2f}")
 
-    # Calculate baseline cost from historical usage_data
-    baseline_cost = get_baseline_cost(payload.repository_full_name, payload.service_name, db)
+    # Calculate baseline cost from previous predictions for this repo
+    baseline_cost = get_baseline_cost(payload.repository_full_name, predicted_cost, db)
     delta = round(predicted_cost - baseline_cost, 2)
 
     # Build a lightweight recommendation string for the API response
@@ -827,7 +888,7 @@ async def analyze_code(payload: AnalyzeRequest):
         "resource_type":      payload.resource_type,
     }])
 
-    predicted_cost = round(float(ml_model.predict(input_df)[0]), 2)
+    predicted_cost = _predict_cost(input_df)
     logger.info(f"🔬 Code analysis | Complexity: {report.complexity_score}/10 | Cost: ${predicted_cost:.2f}")
 
     return AnalyzeResponse(
@@ -994,10 +1055,10 @@ async def analyze_pr(payload: PRAnalyzeRequest, db: Session = Depends(get_db)):
         "service_name":       service_name,
         "resource_type":      resource_type,
     }])
-    predicted_cost = round(float(ml_model.predict(input_df)[0]), 2)
+    predicted_cost = _predict_cost(input_df)
 
     # 7. Baseline & Delta
-    baseline_cost = get_baseline_cost(repo, service_name, db)
+    baseline_cost = get_baseline_cost(repo, predicted_cost, db)
     delta = round(predicted_cost - baseline_cost, 2)
 
     # 8. Gemini AI Analysis
