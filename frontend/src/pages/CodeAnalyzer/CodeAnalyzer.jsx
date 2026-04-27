@@ -76,9 +76,13 @@ export default function CodeAnalyzer() {
     setError(null)
     setResult(null)
     try {
+      const defaultService = localStorage.getItem('default_service_name') || 'compute'
+      const defaultResource = localStorage.getItem('default_resource_type') || 't3.micro'
       const res = await apiClient.post('/api/analyze-pr', {
         pr_number: selectedPR.number,
         repository_full_name: repo,
+        service_name: defaultService,
+        resource_type: defaultResource,
       })
       setResult(res.data)
     } catch (err) {
