@@ -53,9 +53,18 @@ export default function Settings() {
     () => localStorage.getItem('connected_repo')
   )
 
-  // Deployment settings
-  const [serviceName, setServiceName] = useState('compute')
-  const [resourceType, setResourceType] = useState('t3.micro')
+  // Deployment settings — load from localStorage or fallback to defaults
+  const [serviceName, setServiceName] = useState(() => localStorage.getItem('default_service_name') || 'compute')
+  const [resourceType, setResourceType] = useState(() => localStorage.getItem('default_resource_type') || 't3.micro')
+
+  // Persist deployment defaults to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('default_service_name', serviceName)
+  }, [serviceName])
+
+  useEffect(() => {
+    localStorage.setItem('default_resource_type', resourceType)
+  }, [resourceType])
 
   const showToast = (type, message) => {
     setToast({ type, message })
