@@ -27,6 +27,7 @@ services:
       LSTM_MODEL_PATH: /models/lstm_final_forecaster.pth
       GITHUB_WEBHOOK_SECRET: shadowstack_webhook_secret_2026
       APP_DOMAIN: http://localhost:8000
+      APP_ENV: development
     volumes:
       - ./ml_pipeline/models:/models:ro
       - ./backend/pricing_config.yaml:/app/pricing_config.yaml:ro
@@ -35,7 +36,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: node:18-alpine
+    image: node:20-alpine
     working_dir: /app
     ports:
       - "3000:3000"

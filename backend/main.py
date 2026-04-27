@@ -157,6 +157,10 @@ def post_github_comment(repo_full_name: str, pr_number: int, comment_body: str, 
         token = result[0]
     except Exception as e:
         logger.error(f"Failed to fetch GitHub token from DB: {e}")
+        try:
+            db.rollback()
+        except Exception:
+            pass
         return False
 
     url = f"https://api.github.com/repos/{repo_full_name}/issues/{pr_number}/comments"
@@ -201,6 +205,10 @@ def get_baseline_cost(repo_full_name: Optional[str], service_name: str, db: Sess
         return round(float(avg_daily) * 30, 2)
     except Exception as e:
         logger.warning(f"Baseline cost query failed: {e}, using default.")
+        try:
+            db.rollback()
+        except Exception:
+            pass
         return 500.0 * 30  # default $15k/month baseline
 
 
@@ -460,6 +468,11 @@ class AnalyzeResponse(BaseModel):
     predicted_cost_usd: float
     recommendations: List[str]
     summary: str
+
+
+class SimulateWebhookRequest(BaseModel):
+    repo: str = Field(..., example="owner/repo")
+    complexity_score: float = Field(..., ge=1.0, le=10.0, example=6.5)
 
 
 class PRFile(BaseModel):
@@ -1315,6 +1328,123 @@ def get_model_metrics(db: Session = Depends(get_db)):
             "dataset_size": 50000,
             "trained_at": None,
         }
+
+
+# ── Demo / Test Endpoints ──────────────────────────────────────────────────
+
+@app.post("/api/test/simulate-webhook", status_code=status.HTTP_200_OK, tags=["test"])
+async def simulate_webhook(payload: SimulateWebhookRequest, db: Session = Depends(get_db)):
+    if os.getenv("APP_ENV") != "development":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only available in development mode.")
+
+    predict_req = PredictRequest(
+        pr_number=0,
+        repository_full_name=payload.repo,
+        complexity_score=payload.complexity_score,
+        resource_units=round(50 + payload.complexity_score * 25, 2),
+        service_name="compute",
+        resource_type="t3.medium",
+    )
+
+    await predict_cost(predict_req, db)
+
+    # Ensure any failed transaction state is cleared before querying
+    try:
+        db.rollback()
+    except Exception:
+        pass
+
+    prediction_row = db.execute(text("""
+        SELECT id FROM predictions
+        WHERE pr_number = :pr AND repository_full_name = :repo
+        ORDER BY id DESC LIMIT 1
+    """), {"pr": 0, "repo": payload.repo}).fetchone()
+
+    prediction_id = prediction_row[0] if prediction_row else None
+
+    return {"status": "simulation triggered", "prediction_id": prediction_id}
+
+
+@app.delete("/api/test/reset-demo", status_code=status.HTTP_200_OK, tags=["test"])
+async def reset_demo(db: Session = Depends(get_db)):
+    if os.getenv("APP_ENV") != "development":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only available in development mode.")
+
+    result = db.execute(text("DELETE FROM predictions"))
+    db.commit()
+    rows_deleted = result.rowcount
+
+    return {"status": "reset complete", "rows_deleted": rows_deleted}
+
+
+@app.get("/api/test/demo-status", status_code=status.HTTP_200_OK, tags=["test"])
+async def demo_status(db: Session = Depends(get_db)):
+    if os.getenv("APP_ENV") != "development":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only available in development mode.")
+
+    db_connected = False
+    predictions_count = 0
+    integrations_count = 0
+    latest_prediction = None
+
+    try:
+        db.execute(text("SELECT 1"))
+        db_connected = True
+    except Exception:
+        db_connected = False
+
+    try:
+        predictions_count = db.execute(text("SELECT COUNT(*) FROM predictions")).fetchone()[0]
+    except Exception:
+        predictions_count = 0
+
+    try:
+        integrations_count = db.execute(text("SELECT COUNT(*) FROM integrations")).fetchone()[0]
+    except Exception:
+        integrations_count = 0
+
+    models_loaded = ml_model is not None and lstm_model is not None
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "")
+    gemini_configured = bool(gemini_key and gemini_key.strip())
+
+    try:
+        row = db.execute(text("""
+            SELECT id, pr_number, repository_full_name, complexity_score, resource_units,
+                   service_name, resource_type, baseline_cost_usd, predicted_cost_usd,
+                   delta_usd, recommendation, model_version, is_comment_posted, created_at
+            FROM predictions
+            ORDER BY created_at DESC LIMIT 1
+        """)).fetchone()
+
+        if row:
+            latest_prediction = {
+                "id": row[0],
+                "pr_number": row[1],
+                "repository_full_name": row[2],
+                "complexity_score": row[3],
+                "resource_units": row[4],
+                "service_name": row[5],
+                "resource_type": row[6],
+                "baseline_cost_usd": row[7],
+                "predicted_cost_usd": row[8],
+                "delta_usd": row[9],
+                "recommendation": row[10],
+                "model_version": row[11],
+                "is_comment_posted": row[12],
+                "created_at": str(row[13]) if row[13] else None,
+            }
+    except Exception:
+        latest_prediction = None
+
+    return {
+        "db_connected": db_connected,
+        "predictions_count": predictions_count,
+        "integrations_count": integrations_count,
+        "models_loaded": models_loaded,
+        "gemini_configured": gemini_configured,
+        "latest_prediction": latest_prediction,
+    }
 
 
 # PBI-003: GitHub Webhook Listener (Sprint 1 — enhanced with real AST analysis)
