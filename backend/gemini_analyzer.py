@@ -35,47 +35,41 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 
 def _build_prompt(code: str, report: dict, predicted_cost: float, service: str, resource: str) -> str:
-    """Construct the Gemini prompt for cost optimisation analysis."""
-    return f"""You are an expert cloud cost optimisation engineer specialising in infrastructure-aware code review.
+    """Construct the prompt for cost optimization analysis."""
+    return f"""You are a cloud cost optimization engineer.
 
-Analyse the following Python code changes from a Pull Request and provide **specific, actionable cost optimisation suggestions**.
+Analyze the Python code and provide 3–5 actionable cost optimization suggestions.
 
 ## Context
 - **Service:** {service}
 - **Resource Type:** {resource}
 - **Predicted Monthly Cost Impact:** ${predicted_cost:,.2f}
 
-## AST Complexity Metrics
-| Metric | Value |
-|--------|-------|
-| Functions | {report['function_count']} |
-| Total Loops | {report['loop_count']} |
-| Nested Loops | {report['nested_loop_count']} |
-| Branches (if/else) | {report['branch_count']} |
-| Cyclomatic Complexity | {report['cyclomatic_complexity']} |
-| Complexity Score | {report['complexity_score']}/10 |
-| Resource Units | {report['resource_units']} |
+## AST Metrics
+- Functions: {report['function_count']} | Loops: {report['loop_count']} | Nested: {report['nested_loop_count']}
+- Branches: {report['branch_count']} | Complexity Score: {report['complexity_score']}/10
 
 ## Changed Code
 ```python
 {code}
 ```
 
-## Instructions
-Provide **3–5 specific optimisation recommendations**. For each:
-1. **Problem:** Briefly describe the inefficiency and its cost impact.
-2. **Solution:** Provide refactored code or a clear algorithmic alternative.
-3. **Estimated Savings:** Give a rough monthly dollar saving (e.g., "~$45/month").
+## Output Constraints
+- Do NOT include an introduction or summary.
+- Provide ONLY 3-5 recommendations using level-3 headings (###).
+- Each recommendation MUST include: **Problem:**, **Solution:**, and **Estimated Savings:**.
+- If the code is optimal, suggest architectural improvements.
 
-Focus on:
-- Algorithmic complexity (O(n2) → O(n) improvements)
-- Vectorisation with NumPy/Pandas
-- Reducing database queries / I/O
-- Caching / memoisation opportunities
-- Avoiding unnecessary object creation in hot loops
+## Example Format
+### Recommendation Title
+**Problem:** Description
+**Solution:** Code/Refactor
+**Estimated Savings:** Value
 
-Format your entire response as clean markdown with level-3 headings (###) for each recommendation.
+### Recommendation Title
+...and so on.
 """
+
 
 
 def analyze_with_gemini(
