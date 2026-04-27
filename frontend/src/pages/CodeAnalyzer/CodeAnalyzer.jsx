@@ -375,17 +375,68 @@ export default function CodeAnalyzer() {
 // Simple markdown-to-HTML renderer for Gemini output
 function renderMarkdown(md) {
   if (!md) return ''
-  let html = md
-    .replace(/^### (.*$)/gim, '<h3 style="font-size:var(--fs-md);font-weight:600;margin:var(--space-3) 0;color:var(--clr-text-primary);">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 style="font-size:var(--fs-lg);font-weight:600;margin:var(--space-4) 0;color:var(--clr-text-primary);">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 style="font-size:var(--fs-xl);font-weight:700;margin:var(--space-4) 0;color:var(--clr-text-primary);">$1</h1>')
+
+  // Split into blocks (paragraphs, lists, code blocks) separated by blank lines
+  const blocks = md.split(/\n\n+/)
+  const out = []
+
+  for (const block of blocks) {
+    const trimmed = block.trim()
+    if (!trimmed) continue
+
+    // Code blocks
+    if (trimmed.startsWith('```')) {
+      const langMatch = trimmed.match(/^```(\w*)\n([\s\S]*?)```$/)
+      if (langMatch) {
+        out.push(`<pre style="background:var(--clr-bg-surface);padding:var(--space-3);border-radius:var(--radius-md);overflow-x:auto;font-family:monospace;font-size:var(--fs-xs);line-height:1.5;margin:var(--space-3) 0;"><code>${escapeHtml(langMatch[2])}</code></pre>`)
+      } else {
+        out.push(`<pre style="background:var(--clr-bg-surface);padding:var(--space-3);border-radius:var(--radius-md);overflow-x:auto;font-family:monospace;font-size:var(--fs-xs);line-height:1.5;margin:var(--space-3) 0;"><code>${escapeHtml(trimmed.replace(/^```|```$/g, '').trim())}</code></pre>`)
+      }
+      continue
+    }
+
+    // Unordered lists
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      const items = trimmed.split('\n').filter(l => l.trim().startsWith('- ') || l.trim().startsWith('* '))
+      const lis = items.map(item => {
+        const content = item.trim().replace(/^[-*]\s+/, '')
+        return `<li style="margin-bottom:var(--space-2);color:var(--clr-text-secondary);">${inlineMarkdown(content)}</li>`
+      }).join('')
+      out.push(`<ul style="padding-left:var(--space-4);margin:var(--space-3) 0;">${lis}</ul>`)
+      continue
+    }
+
+    // Headings
+    if (trimmed.startsWith('### ')) {
+      out.push(`<h3 style="font-size:var(--fs-md);font-weight:600;margin:var(--space-3) 0;color:var(--clr-text-primary);">${escapeHtml(trimmed.slice(4))}</h3>`)
+      continue
+    }
+    if (trimmed.startsWith('## ')) {
+      out.push(`<h2 style="font-size:var(--fs-lg);font-weight:600;margin:var(--space-4) 0;color:var(--clr-text-primary);">${escapeHtml(trimmed.slice(3))}</h2>`)
+      continue
+    }
+    if (trimmed.startsWith('# ')) {
+      out.push(`<h1 style="font-size:var(--fs-xl);font-weight:700;margin:var(--space-4) 0;color:var(--clr-text-primary);">${escapeHtml(trimmed.slice(2))}</h1>`)
+      continue
+    }
+
+    // Regular paragraph
+    out.push(`<p style="margin-bottom:var(--space-3);color:var(--clr-text-secondary);">${inlineMarkdown(trimmed)}</p>`)
+  }
+
+  return out.join('')
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function inlineMarkdown(text) {
+  return escapeHtml(text)
     .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--clr-text-primary);">$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/`([^`]+)`/g, '<code style="background:var(--clr-bg-surface);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:var(--fs-xs);">$1</code>')
-    .replace(/^\- (.*$)/gim, '<li style="margin-bottom:var(--space-2);color:var(--clr-text-secondary);">$1</li>')
-    .replace(/(<li.*<\/li>)/s, '<ul style="padding-left:var(--space-4);margin:var(--space-3) 0;">$1</ul>')
-    .replace(/```python\n([\s\S]*?)\n```/g, '<pre style="background:var(--clr-bg-surface);padding:var(--space-3);border-radius:var(--radius-md);overflow-x:auto;font-family:monospace;font-size:var(--fs-xs);line-height:1.5;margin:var(--space-3) 0;"><code>$1</code></pre>')
-    .replace(/```\n([\s\S]*?)\n```/g, '<pre style="background:var(--clr-bg-surface);padding:var(--space-3);border-radius:var(--radius-md);overflow-x:auto;font-family:monospace;font-size:var(--fs-xs);line-height:1.5;margin:var(--space-3) 0;"><code>$1</code></pre>')
-    .replace(/\n/g, '<br/>')
-  return html
 }

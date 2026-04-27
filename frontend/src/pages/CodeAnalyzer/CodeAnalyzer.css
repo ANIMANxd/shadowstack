@@ -295,6 +295,8 @@
   font-size: var(--fs-sm);
   line-height: 1.7;
   color: var(--clr-text-secondary);
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .analyzer__gemini-output h3 {

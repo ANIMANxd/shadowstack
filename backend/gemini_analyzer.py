@@ -82,8 +82,8 @@ def analyze_with_gemini(
     code: str,
     report: dict,
     predicted_cost: float,
-    service_name: str = "compute",
-    resource_type: str = "t3.micro",
+    service_name: str,
+    resource_type: str,
 ) -> Optional[str]:
     """
     Send code + metrics to Gemini and return AI-powered optimisation suggestions.
@@ -102,7 +102,7 @@ def analyze_with_gemini(
             contents=types.Part.from_text(text=prompt),
             config=types.GenerateContentConfig(
                 temperature=0.3,
-                max_output_tokens=2048,
+                max_output_tokens=4096,
                 top_p=0.95,
             ),
         )
